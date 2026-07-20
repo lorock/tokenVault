@@ -1,0 +1,23 @@
+{
+  "name": "totp-validator",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TOTP 多站点验证器（Vue 3 + Vite + Vant），面向微信菜单 H5 场景",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host"
+  },
+  "dependencies": {
+    "@vant/icons": "^3.0.2",
+    "jsqr": "^1.4.0",
+    "qrcode": "^1.5.4",
+    "vant": "^4.9.6",
+    "vue": "^3.4.38"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.3",
+    "vite": "^5.4.3"
+  }
+}

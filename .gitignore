@@ -1,0 +1,23 @@
+# ===== 依赖（由 npm install 生成，不纳入版本控制）=====
+node_modules/
+
+# ===== 构建产物（由 npm run build 生成）=====
+dist/
+
+# ===== 旧版单体实现（已被 Vue 工程取代，非必要）=====
+index.legacy.html
+vendor/
+
+# ===== 内部工作记忆目录（非项目源码）=====
+.workbuddy/
+
+# ===== 系统 / 编辑器文件 =====
+.DS_Store
+Thumbs.db
+*.swp
+
+# ===== 本地环境变量 / 日志 =====
+.env
+.env.*
+*.local
+*.log
