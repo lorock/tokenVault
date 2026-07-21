@@ -63,7 +63,8 @@ const messages = {
       importAllExist: '所有站点已存在，无需导入',
       imported: '成功导入 {n} 个站点',
       importFailed: '导入失败: {msg}',
-      saveFailed: '保存失败：当前环境无法写入本地存储，数据可能不会保留'
+      saveFailed: '保存失败：当前环境无法写入本地存储，数据可能不会保留',
+      cryptoUnavailable: '当前环境不支持加密运算，请使用 HTTPS 打开'
     },
     confirm: {
       deleteTitle: '删除站点',
@@ -77,6 +78,8 @@ const messages = {
     },
     site: {
       unnamed: '未命名站点',
+      typeTotp: 'TOTP',
+      typeHotp: 'HOTP',
       secondsLeft: '{n}s 后刷新',
       copiedCode: '已复制验证码',
       copyHint: '点击复制验证码',
@@ -201,7 +204,8 @@ const messages = {
       importAllExist: 'All sites already exist — nothing to import',
       imported: 'Successfully imported {n} site(s)',
       importFailed: 'Import failed: {msg}',
-      saveFailed: 'Save failed: this environment cannot write to local storage — data may not persist'
+      saveFailed: 'Save failed: this environment cannot write to local storage — data may not persist',
+      cryptoUnavailable: 'Cryptographic operations are not available in this environment. Please use HTTPS.'
     },
     confirm: {
       deleteTitle: 'Delete Site',
@@ -215,6 +219,8 @@ const messages = {
     },
     site: {
       unnamed: 'Unnamed site',
+      typeTotp: 'TOTP',
+      typeHotp: 'HOTP',
       secondsLeft: 'Refreshes in {n}s',
       copiedCode: 'Code copied',
       copyHint: 'Tap to copy code',

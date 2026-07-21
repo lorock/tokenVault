@@ -7,7 +7,7 @@
       <div class="sc-meta">
         <div class="sc-issuer">
           {{ site.issuer || t('site.unnamed') }}
-          <span v-if="isHotp" class="sc-type">HOTP</span>
+          <span class="sc-type">{{ isHotp ? t('site.typeHotp') : t('site.typeTotp') }}</span>
         </div>
         <div class="sc-account">{{ site.account }}</div>
       </div>
@@ -24,19 +24,21 @@
     </div>
     <div class="sc-hint" @click="copyCode">{{ t('site.copyHint') }}</div>
 
-    <!-- TOTP：时间进度条；HOTP：计数器 + 下一码 -->
-    <div v-if="!isHotp" class="sc-progress">
-      <div class="sc-bar" :class="barState" :style="{ width: progress + '%' }"></div>
-    </div>
-    <div v-else class="sc-hotp">
-      <span class="sc-counter">{{ t('site.counter', { n: counterVal }) }}</span>
-      <van-button size="mini" plain class="sc-next" @click="advance">
-        <van-icon name="replay" /> {{ t('site.next') }}
-      </van-button>
+    <!-- 统一状态行：TOTP 剩余时间+进度条；HOTP 计数器+下一码。固定等高结构，避免两列网格高度参差 -->
+    <div class="sc-status">
+      <template v-if="!isHotp">
+        <span class="sc-remaining" :class="barState">{{ t('site.secondsLeft', { n: remaining }) }}</span>
+        <div class="sc-progress"><div class="sc-bar" :class="barState" :style="{ width: progress + '%' }"></div></div>
+      </template>
+      <template v-else>
+        <span class="sc-counter">{{ t('site.counter', { n: counterVal }) }}</span>
+        <van-button size="mini" plain class="sc-next" @click="advance">
+          <van-icon name="replay" /> {{ t('site.next') }}
+        </van-button>
+      </template>
     </div>
 
     <div class="sc-actions">
-      <span v-if="!isHotp" class="sc-remaining" :class="barState">{{ t('site.secondsLeft', { n: remaining }) }}</span>
       <div class="sc-btns">
         <van-button size="mini" plain @click="copyCode">{{ t('common.copy') }}</van-button>
         <van-button size="mini" plain @click="$emit('share', site)">{{ t('common.share') }}</van-button>
@@ -243,7 +245,19 @@ async function onDelete() {
   margin-bottom: 12px;
   cursor: pointer;
 }
+
+/* 统一状态行：固定 28px 等高，左侧信息文字，右侧进度条或下一码按钮 */
+.sc-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 28px;
+  margin-bottom: 12px;
+}
 .sc-progress {
+  flex: 1;
+  max-width: 120px;
   height: 5px;
   border-radius: 999px;
   background: var(--card-border);
@@ -261,13 +275,6 @@ async function onDelete() {
 .sc-bar.danger {
   background: linear-gradient(90deg, #f87171, var(--danger));
 }
-.sc-hotp {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 28px;
-  margin-bottom: 0;
-}
 .sc-counter {
   font-size: var(--f-label);
   font-weight: 600;
@@ -278,8 +285,8 @@ async function onDelete() {
 .sc-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 12px;
+  justify-content: flex-end;
+  min-height: 28px;
 }
 .sc-remaining {
   font-size: var(--f-hint);

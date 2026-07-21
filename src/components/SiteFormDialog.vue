@@ -215,9 +215,13 @@ watch(
 )
 
 function genSecret() {
-  const buf = crypto.getRandomValues(new Uint8Array(20))
-  secret.value = base32Encode(buf)
-  secretError.value = ''
+  try {
+    const buf = crypto.getRandomValues(new Uint8Array(20))
+    secret.value = base32Encode(buf)
+    secretError.value = ''
+  } catch {
+    showToast(t('toast.cryptoUnavailable'))
+  }
 }
 
 function pickFile() {

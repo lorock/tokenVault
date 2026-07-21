@@ -36,7 +36,12 @@ export function normalizeSite(s) {
 }
 
 export function saveSites(sites) {
-  localStorage.setItem(KEY, JSON.stringify(sites))
+  try {
+    localStorage.setItem(KEY, JSON.stringify(sites))
+    return true
+  } catch {
+    return false
+  }
 }
 
 export function uid() {

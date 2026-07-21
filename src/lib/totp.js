@@ -83,7 +83,7 @@ export async function hotp(secretBase32, opts = {}) {
 
 // TOTP (RFC 6238)：HOTP 的时间变形，计数器 = floor(时间 / 步长)
 export async function totp(secretBase32, opts = {}) {
-  const period = opts.period || 30
+  const period = Number.isFinite(opts.period) && opts.period > 0 ? opts.period : 30
   const ts = opts.timestamp != null ? opts.timestamp : Date.now()
   const counter = Math.floor(ts / 1000 / period)
   const { code } = await hotp(secretBase32, {

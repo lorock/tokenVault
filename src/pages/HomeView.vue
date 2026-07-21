@@ -215,18 +215,25 @@ function dismissRisk() {
 }
 
 let timer = null
+function onVisibilityChange() {
+  if (!document.hidden) {
+    now.value = Date.now()
+  }
+}
 onMounted(() => {
   timer = setInterval(() => {
     now.value = Date.now()
   }, 500)
+  document.addEventListener('visibilitychange', onVisibilityChange)
 })
-onUnmounted(() => clearInterval(timer))
+onUnmounted(() => {
+  clearInterval(timer)
+  document.removeEventListener('visibilitychange', onVisibilityChange)
+})
 
 function persist() {
-  try {
-    saveSites(sites.value)
-  } catch {
-    // 隐私模式 / 配额耗尽 / 存储被禁用：保存失败不应让主流程崩溃
+  const ok = saveSites(sites.value)
+  if (!ok) {
     showToast(t('toast.saveFailed'))
   }
 }
@@ -296,7 +303,8 @@ function exportBackup() {
         period: s.period,
         type: s.type,
         counter: s.counter,
-        color: s.color
+        color: s.color,
+        createdAt: s.createdAt
       }))
     }
   const json = JSON.stringify(backup, null, 2)

@@ -46,6 +46,8 @@ watch(visible, async (v) => {
       qrUrl.value = ''
       showToast(t('share.qrFailed'))
     }
+  } else {
+    qrUrl.value = ''
   }
 })
 
