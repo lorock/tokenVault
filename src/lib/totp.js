@@ -52,7 +52,8 @@ const ALGO_MAP = { 'SHA-1': 'SHA-1', 'SHA-256': 'SHA-256', 'SHA-512': 'SHA-512' 
 export async function hotp(secretBase32, opts = {}) {
   const algo = (opts.algorithm || 'SHA-1').toUpperCase()
   const algoName = ALGO_MAP[algo] || 'SHA-1'
-  const digits = opts.digits || 6
+  // 位数钳制：仅 6 / 8 为标准；其余（含从 URI / 导入传入的非标准值）回退 6
+  const digits = [6, 8].includes(Number(opts.digits)) ? Number(opts.digits) : 6
   const counter = opts.counter || 0
   const keyBytes = base32Decode(secretBase32)
 
@@ -107,7 +108,8 @@ export function parseOtpAuthUri(uri) {
   if (params.get('issuer')) issuer = params.get('issuer')
   const secret = (params.get('secret') || '').replace(/\s/g, '')
   const algo = (params.get('algorithm') || 'SHA-1').toUpperCase()
-  const digits = parseInt(params.get('digits') || '6', 10)
+  const rawDigits = parseInt(params.get('digits') || '6', 10)
+  const digits = [6, 8].includes(rawDigits) ? rawDigits : 6
   const period = parseInt(params.get('period') || '30', 10)
   const counter = parseInt(params.get('counter') || '0', 10)
 

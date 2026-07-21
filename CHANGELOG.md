@@ -2,6 +2,13 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.3.1] - 2026-07-21
+
+### 修复（数据健壮性）
+
+- **位数强制钳制为 6/8**：此前从导入备份或粘贴 `otpauth` URI 传入的非标准位数（如 4、10）会被原样采用，生成的验证码与 Google Authenticator / Authy 及服务端不兼容、登录静默失败。`storage.normalizeSite`、`parseOtpAuthUri` 与 `hotp()` 现统一将 `digits` 钳制为 6 或 8（其余值回退 6）。表单单选仅提供 6/8，不受影响。
+- **导入去重键加固**：去重键由 `issuer||account||secret` 改为 `JSON.stringify([issuer, account, secret])`。密钥本身仍在键中（同名不同密钥不会被误并），改用 JSON 序列化可避免 `issuer`/`account` 包含分隔符 `||` 时产生碰撞误判。
+
 ## [2.3.0] - 2026-07-21
 
 ### 新增（HOTP 与品牌）

@@ -22,7 +22,9 @@ export function normalizeSite(s) {
     account: s.account || '',
     secret: String(s.secret || '').trim().toUpperCase(),
     algo: s.algo || 'SHA-1',
-    digits: s.digits || 6,
+    // 仅允许标准位数 6 / 8；导入备份若含非标准位数（如 4、10）统一钳制为 6，
+    // 避免生成与主流验证器 / 服务端不兼容的验证码。
+    digits: [6, 8].includes(Number(s.digits)) ? Number(s.digits) : 6,
     period: s.period || 30,
     type: s.type === 'hotp' ? 'hotp' : 'totp',
     counter: Number.isFinite(s.counter) ? s.counter : 0,

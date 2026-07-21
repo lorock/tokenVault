@@ -219,15 +219,14 @@ async function handleImportFile(e) {
     if (!data.sites || !Array.isArray(data.sites)) {
       throw new Error('无效的备份文件：缺少 sites 字段')
     }
-    const existingKeys = new Set(
-      sites.value.map((s) => `${s.issuer}||${s.account}||${s.secret}`)
-    )
+    // 去重键 = [issuer, account, secret] 的序列化；含密钥可避免「同名不同密钥」被误判重复。
+    // 用 JSON.stringify 而非 || 拼接，防止 issuer/account 含分隔符时产生碰撞误判。
+    const keyOf = (s) => JSON.stringify([s.issuer, s.account, s.secret])
+    const existingKeys = new Set(sites.value.map(keyOf))
     const normalized = data.sites
       .filter((s) => s && s.secret)
       .map((s) => normalizeSite(s))
-    const unique = normalized.filter(
-      (s) => !existingKeys.has(`${s.issuer}||${s.account}||${s.secret}`)
-    )
+    const unique = normalized.filter((s) => !existingKeys.has(keyOf(s)))
     if (unique.length === 0) {
       return showToast(t('toast.importAllExist'))
     }
