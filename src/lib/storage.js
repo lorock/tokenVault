@@ -28,7 +28,10 @@ export function normalizeSite(s) {
     period: s.period || 30,
     type: s.type === 'hotp' ? 'hotp' : 'totp',
     counter: Number.isFinite(s.counter) ? s.counter : 0,
-    color: s.color || '#4f8cff'
+    color: s.color || '#4f8cff',
+    // 创建时间戳：用于「最近添加」排序。旧备份/历史数据无此字段时回退 0（视为最旧），
+    // 保证导入的老数据不会因缺字段而报错或排在异常位置。
+    createdAt: Number.isFinite(s.createdAt) ? s.createdAt : 0
   }
 }
 

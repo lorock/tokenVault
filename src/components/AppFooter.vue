@@ -42,7 +42,7 @@ function toggleLang() {
   margin-bottom: 8px;
 }
 .footer-link {
-  font-size: 13px;
+  font-size: var(--f-label);
   font-weight: 600;
   color: var(--accent);
   text-decoration: none;
@@ -63,13 +63,13 @@ function toggleLang() {
   font-size: 12px;
 }
 .footer-copyright {
-  font-size: 12px;
+  font-size: var(--f-hint);
   color: var(--text-2);
   line-height: 1.6;
 }
 .footer-note {
   margin-top: 2px;
-  font-size: 11px;
+  font-size: var(--f-micro);
   color: var(--text-2);
   opacity: 0.8;
   line-height: 1.6;

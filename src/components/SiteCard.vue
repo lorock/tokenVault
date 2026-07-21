@@ -169,7 +169,7 @@ async function onDelete() {
   border-radius: 13px;
   color: #fff;
   font-weight: 700;
-  font-size: 18px;
+  font-size: var(--f-avatar);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -183,7 +183,7 @@ async function onDelete() {
 }
 .sc-issuer {
   font-weight: 600;
-  font-size: 15px;
+  font-size: var(--f-subtitle);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -203,7 +203,7 @@ async function onDelete() {
   line-height: 1.6;
 }
 .sc-account {
-  font-size: 12px;
+  font-size: var(--f-label);
   color: var(--text-2);
   white-space: nowrap;
   overflow: hidden;
@@ -215,7 +215,7 @@ async function onDelete() {
   align-items: center;
   justify-content: center;
   gap: 0.18em;
-  font-size: 40px;
+  font-size: var(--f-code);
   font-weight: 700;
   letter-spacing: 0.06em;
   margin: 16px 0 4px;
@@ -237,7 +237,7 @@ async function onDelete() {
 }
 .sc-hint {
   text-align: center;
-  font-size: 11px;
+  font-size: var(--f-hint);
   color: var(--text-2);
   letter-spacing: 0.02em;
   margin-bottom: 12px;
@@ -269,7 +269,7 @@ async function onDelete() {
   margin-bottom: 0;
 }
 .sc-counter {
-  font-size: 13px;
+  font-size: var(--f-label);
   font-weight: 600;
   color: var(--text-2);
   font-variant-numeric: tabular-nums;
@@ -282,7 +282,7 @@ async function onDelete() {
   margin-top: 12px;
 }
 .sc-remaining {
-  font-size: 12px;
+  font-size: var(--f-hint);
   color: var(--text-2);
   font-variant-numeric: tabular-nums;
 }
@@ -296,5 +296,12 @@ async function onDelete() {
 .sc-btns {
   display: flex;
   gap: 8px;
+}
+
+/* 宽屏两列网格下，卡片间距交由网格 gap 控制，移除自身外边距 */
+@media (min-width: 768px) {
+  .site-card {
+    margin: 0;
+  }
 }
 </style>

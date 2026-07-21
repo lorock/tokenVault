@@ -46,7 +46,15 @@ async function hmac(algoName, keyBytes, data) {
   return new Uint8Array(await subtle.sign('HMAC', key, data))
 }
 
-const ALGO_MAP = { 'SHA-1': 'SHA-1', 'SHA-256': 'SHA-256', 'SHA-512': 'SHA-512' }
+const ALGO_MAP = {
+  'SHA-1': 'SHA-1',
+  'SHA-256': 'SHA-256',
+  'SHA-512': 'SHA-512',
+  // 兼容标准 otpauth URI 的无连字符写法（如 algorithm=SHA256）
+  'SHA1': 'SHA-1',
+  'SHA256': 'SHA-256',
+  'SHA512': 'SHA-512'
+}
 
 // HOTP (RFC 4226)：以计数器为输入生成动态口令
 export async function hotp(secretBase32, opts = {}) {
@@ -107,7 +115,9 @@ export function parseOtpAuthUri(uri) {
   const params = new URLSearchParams(url.search)
   if (params.get('issuer')) issuer = params.get('issuer')
   const secret = (params.get('secret') || '').replace(/\s/g, '')
-  const algo = (params.get('algorithm') || 'SHA-1').toUpperCase()
+  // 归一化为带连字符的标准名；外部 URI 的 SHA256 等无连字符写法也能正确识别，
+  // 否则会落入 ALGO_MAP 默认值 SHA-1，导致导入的 SHA-256/512 站点算出错误验证码。
+  const algo = ALGO_MAP[(params.get('algorithm') || 'SHA-1').toUpperCase()] || 'SHA-1'
   const rawDigits = parseInt(params.get('digits') || '6', 10)
   const digits = [6, 8].includes(rawDigits) ? rawDigits : 6
   const period = parseInt(params.get('period') || '30', 10)
@@ -131,7 +141,9 @@ export function buildOtpAuthUri(s) {
   const u = new URL(`otpauth://${type}/` + encodeURIComponent(label))
   u.searchParams.set('secret', s.secret)
   if (s.issuer) u.searchParams.set('issuer', s.issuer)
-  if (s.algo && s.algo !== 'SHA-1') u.searchParams.set('algorithm', s.algo)
+  // 导出算法名采用无连字符标准写法（SHA256），符合主流验证器对 otpauth URI 的约定
+  const algoOut = (s.algo || 'SHA-1').replace('-', '')
+  if (algoOut && algoOut !== 'SHA1') u.searchParams.set('algorithm', algoOut)
   if (s.digits && s.digits !== 6) u.searchParams.set('digits', String(s.digits))
   if (type === 'hotp') {
     u.searchParams.set('counter', String(s.counter || 0))

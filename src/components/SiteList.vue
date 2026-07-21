@@ -28,4 +28,13 @@ defineEmits(['edit', 'share', 'delete', 'advance'])
 .site-list {
   padding: 4px 0 90px;
 }
+@media (min-width: 768px) {
+  .site-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 16px 12px 96px;
+    align-items: start;
+  }
+}
 </style>

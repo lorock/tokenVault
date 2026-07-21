@@ -45,7 +45,16 @@ const messages = {
       riskDismiss: '不再提示',
       emptyTitle: '还没有站点',
       emptyDesc: '添加你的第一个两步验证站点，支持二维码图片扫描与 otpauth URI 粘贴。',
-      addSite: '添加站点'
+      addSite: '添加站点',
+      search: '搜索',
+      searchPh: '搜索站点名称或账户',
+      sort: '排序',
+      sortName: '按名称',
+      sortRecent: '最近添加',
+      sortType: '按类型',
+      noResult: '没有匹配的站点',
+      noResultDesc: '换个关键词，或清除搜索条件',
+      clearSearch: '清除搜索'
     },
     toast: {
       saved: '已保存',
@@ -174,7 +183,16 @@ const messages = {
       riskDismiss: "Don't show again",
       emptyTitle: 'No sites yet',
       emptyDesc: 'Add your first two-factor site. Supports QR image scanning and otpauth URI paste.',
-      addSite: 'Add Site'
+      addSite: 'Add Site',
+      search: 'Search',
+      searchPh: 'Search site name or account',
+      sort: 'Sort',
+      sortName: 'Name',
+      sortRecent: 'Recently added',
+      sortType: 'Type',
+      noResult: 'No matching sites',
+      noResultDesc: 'Try a different keyword, or clear the search',
+      clearSearch: 'Clear'
     },
     toast: {
       saved: 'Saved',
