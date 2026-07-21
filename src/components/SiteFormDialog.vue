@@ -213,7 +213,11 @@ async function onFile(e) {
   try {
     const data = await decodeQrFromFile(file)
     if (!data) return showToast(t('form.noQr'))
-    fillFromParsed(parseOtpAuthUri(data))
+    const parsed = parseOtpAuthUri(data)
+    if (parsed.type === 'hotp') {
+      return showToast(t('form.hotpUnsupported'))
+    }
+    fillFromParsed(parsed)
     showToast(t('form.recognized'))
   } catch (err) {
     showToast(t('form.recogFailed', { msg: err.message }))
@@ -225,7 +229,11 @@ function parsePaste() {
   const uri = pasteUri.value.trim()
   if (!uri) return showToast(t('form.enterUri'))
   try {
-    fillFromParsed(parseOtpAuthUri(uri))
+    const parsed = parseOtpAuthUri(uri)
+    if (parsed.type === 'hotp') {
+      return showToast(t('form.hotpUnsupported'))
+    }
+    fillFromParsed(parsed)
     showPaste.value = false
   } catch (e) {
     showToast(e.message)

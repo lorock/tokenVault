@@ -2,6 +2,15 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.2.2] - 2026-07-21
+
+### 修复（逻辑错误与健壮性）
+
+- **存储禁用不再崩溃**：`useI18n` / `useTheme` / `HomeView` 顶部对 `localStorage` 的未保护读取在隐私模式或存储被完全禁用时会抛错导致整页白屏；已统一加 try/catch 回退。主题切换的写入亦加保护。
+- **保存失败不再中断主流程**：`persist()` 的 `saveSites` 包 try/catch，存储不可用时提示「保存失败：无法写入本地存储」而非抛出未捕获异常（此前会导致保存后无 toast、且编辑弹窗不关闭）。
+- **编辑站点后验证码即时刷新**：`SiteCard` 仅监听周期边界重算 TOTP，导致改密钥/算法但周期不变时显示陈旧码；现同时监听 `secret/algo/digits/period`，编辑后立刻重算。
+- **HOTP 兜底**：扫码或粘贴 `otpauth://hotp/...` 时明确提示「暂仅支持 TOTP」，避免被当成 TOTP 算出错误码。
+
 ## [2.2.1] - 2026-07-21
 
 ### 优化（合规页导航）

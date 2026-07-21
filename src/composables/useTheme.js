@@ -5,7 +5,13 @@ import { ref } from 'vue'
 const THEME_KEY = 'totp_theme'
 const ORDER = ['light', 'dark', 'system']
 
-const theme = ref(localStorage.getItem(THEME_KEY) || 'system')
+let initialTheme = 'system'
+try {
+  initialTheme = localStorage.getItem(THEME_KEY) || 'system'
+} catch {
+  // 隐私模式 / 存储被禁用：回退跟随系统，不阻断应用启动
+}
+const theme = ref(initialTheme)
 const resolved = ref('light')
 
 function systemPrefersDark() {
@@ -25,7 +31,11 @@ function apply() {
 
 function setTheme(t) {
   theme.value = t
-  localStorage.setItem(THEME_KEY, t)
+  try {
+    localStorage.setItem(THEME_KEY, t)
+  } catch {
+    // 存储不可用时仅本次会话生效
+  }
   apply()
 }
 

@@ -4,7 +4,13 @@ import { ref } from 'vue'
 
 const LOCALE_KEY = 'totp_locale'
 
-const locale = ref(localStorage.getItem(LOCALE_KEY) || 'zh')
+let initialLocale = 'zh'
+try {
+  initialLocale = localStorage.getItem(LOCALE_KEY) || 'zh'
+} catch {
+  // 隐私模式 / 存储被禁用：回退中文，不阻断应用启动
+}
+const locale = ref(initialLocale)
 
 const messages = {
   zh: {
@@ -47,7 +53,8 @@ const messages = {
       exported: '已导出 {n} 个站点',
       importAllExist: '所有站点已存在，无需导入',
       imported: '成功导入 {n} 个站点',
-      importFailed: '导入失败: {msg}'
+      importFailed: '导入失败: {msg}',
+      saveFailed: '保存失败：当前环境无法写入本地存储，数据可能不会保留'
     },
     confirm: {
       deleteTitle: '删除站点',
@@ -99,6 +106,7 @@ const messages = {
       enterIssuer: '请输入站点名称',
       enterSecret: '请输入密钥或扫描二维码',
       invalidSecret: '密钥格式无效（需 Base32）',
+      hotpUnsupported: '暂仅支持 TOTP 类型，HOTP 无法正确计算',
       digits6: '6 位',
       digits8: '8 位',
       period30: '30 秒',
@@ -168,7 +176,8 @@ const messages = {
       exported: 'Exported {n} site(s)',
       importAllExist: 'All sites already exist — nothing to import',
       imported: 'Successfully imported {n} site(s)',
-      importFailed: 'Import failed: {msg}'
+      importFailed: 'Import failed: {msg}',
+      saveFailed: 'Save failed: this environment cannot write to local storage — data may not persist'
     },
     confirm: {
       deleteTitle: 'Delete Site',
@@ -220,6 +229,7 @@ const messages = {
       enterIssuer: 'Please enter a site name',
       enterSecret: 'Please enter a secret or scan a QR code',
       invalidSecret: 'Invalid secret format (Base32 required)',
+      hotpUnsupported: 'Only TOTP is supported; HOTP cannot be computed correctly',
       digits6: '6 digits',
       digits8: '8 digits',
       period30: '30s',

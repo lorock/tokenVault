@@ -70,7 +70,13 @@ async function computeCode() {
   }
 }
 
-watch(counter, computeCode, { immediate: true })
+// 周期边界（counter）变化需重算；编辑密钥/算法/位数/周期时也要即时重算，
+// 否则改了密钥但周期没变会显示陈旧的验证码
+watch(
+  [counter, () => props.site.secret, () => props.site.algo, () => props.site.digits, () => props.site.period],
+  computeCode,
+  { immediate: true }
+)
 
 async function copyCode() {
   const ok = await copyText(code.value)

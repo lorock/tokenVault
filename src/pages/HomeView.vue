@@ -85,7 +85,13 @@ const shareSiteData = ref(null)
 const importInput = ref(null)
 
 const storageOk = isStorageAvailable()
-const riskDismissed = ref(localStorage.getItem('totp_risk_dismissed') === '1')
+let dismissed = false
+try {
+  dismissed = localStorage.getItem('totp_risk_dismissed') === '1'
+} catch {
+  // 存储不可用时视为未关闭提示
+}
+const riskDismissed = ref(dismissed)
 function dismissRisk() {
   riskDismissed.value = true
   try { localStorage.setItem('totp_risk_dismissed', '1') } catch {}
@@ -100,7 +106,12 @@ onMounted(() => {
 onUnmounted(() => clearInterval(timer))
 
 function persist() {
-  saveSites(sites.value)
+  try {
+    saveSites(sites.value)
+  } catch {
+    // 隐私模式 / 配额耗尽 / 存储被禁用：保存失败不应让主流程崩溃
+    showToast(t('toast.saveFailed'))
+  }
 }
 
 function addSite() {
