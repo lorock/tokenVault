@@ -1,10 +1,11 @@
 <template>
   <div class="site-list">
     <SiteCard
-      v-for="s in sites"
+      v-for="(s, index) in sites"
       :key="s.id"
       :site="s"
       :now="now"
+      :style="{ '--i': index }"
       @edit="$emit('edit', $event)"
       @share="$emit('share', $event)"
       @delete="$emit('delete', $event)"

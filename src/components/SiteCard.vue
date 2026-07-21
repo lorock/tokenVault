@@ -14,9 +14,15 @@
       <van-button size="mini" plain @click="$emit('edit', site)">{{ t('common.edit') }}</van-button>
     </div>
 
-    <div class="sc-code mono grad-text" @click="copyCode">
-      {{ code || '······' }}
+    <div class="sc-code mono grad-text" @click="copyCode" role="button" :aria-label="t('site.copyHint')">
+      <template v-if="grouped.length === 2">
+        <span class="grp">{{ grouped[0] }}</span>
+        <span class="grp-sep"></span>
+        <span class="grp">{{ grouped[1] }}</span>
+      </template>
+      <template v-else>{{ grouped[0] || '······' }}</template>
     </div>
+    <div class="sc-hint" @click="copyCode">{{ t('site.copyHint') }}</div>
 
     <!-- TOTP：时间进度条；HOTP：计数器 + 下一码 -->
     <div v-if="!isHotp" class="sc-progress">
@@ -68,6 +74,14 @@ const barState = computed(() => {
   return 'normal'
 })
 const initial = computed(() => (props.site.issuer || props.site.account || '?').trim().charAt(0).toUpperCase())
+
+// 验证码分组显示：6 位 → 3+3，8 位 → 4+4（贴合银行/企业验证器的可读习惯）
+const grouped = computed(() => {
+  const c = code.value
+  if (!c || c.length < 4) return [c || '']
+  const mid = Math.ceil(c.length / 2)
+  return [c.slice(0, mid), c.slice(mid)]
+})
 
 async function computeCode() {
   try {
@@ -136,12 +150,12 @@ async function onDelete() {
   padding: 18px;
   margin: 14px 12px;
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(14px) saturate(160%);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.25s ease;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s ease;
+  animation: cardIn 0.42s var(--ease) both;
+  animation-delay: calc((var(--i, 0)) * 55ms);
 }
 .site-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow);
 }
 .sc-head {
@@ -197,17 +211,37 @@ async function onDelete() {
   margin-top: 2px;
 }
 .sc-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.18em;
   font-size: 40px;
   font-weight: 700;
-  margin: 16px 0 12px;
-  letter-spacing: 0.18em;
-  padding-left: 0.18em;
+  letter-spacing: 0.06em;
+  margin: 16px 0 4px;
   cursor: pointer;
   user-select: none;
-  transition: opacity 0.2s ease;
+  font-variant-numeric: tabular-nums;
+  transition: opacity 0.2s ease, transform 0.2s var(--ease);
 }
 .sc-code:active {
-  opacity: 0.6;
+  opacity: 0.55;
+  transform: scale(0.99);
+}
+.sc-code .grp-sep {
+  width: 2px;
+  height: 0.6em;
+  border-radius: 2px;
+  background: var(--accent);
+  opacity: 0.3;
+}
+.sc-hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-2);
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+  cursor: pointer;
 }
 .sc-progress {
   height: 5px;
@@ -231,9 +265,8 @@ async function onDelete() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 5px;
-  margin-bottom: 0;
   min-height: 28px;
+  margin-bottom: 0;
 }
 .sc-counter {
   font-size: 13px;

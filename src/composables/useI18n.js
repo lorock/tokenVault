@@ -70,6 +70,7 @@ const messages = {
       unnamed: '未命名站点',
       secondsLeft: '{n}s 后刷新',
       copiedCode: '已复制验证码',
+      copyHint: '点击复制验证码',
       counter: '计数器 C{n}',
       next: '下一码',
       confirmDeleteMsg: '确定删除「{name}」？'
@@ -198,6 +199,7 @@ const messages = {
       unnamed: 'Unnamed site',
       secondsLeft: 'Refreshes in {n}s',
       copiedCode: 'Code copied',
+      copyHint: 'Tap to copy code',
       counter: 'Counter C{n}',
       next: 'Next code',
       confirmDeleteMsg: 'Delete "{name}"?'

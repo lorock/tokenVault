@@ -27,7 +27,7 @@ function toggleLang() {
 <style scoped>
 .app-footer {
   flex-shrink: 0;
-  padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
+  padding: 20px 16px calc(18px + env(safe-area-inset-bottom));
   text-align: center;
   background: var(--card-bg);
   border-top: 1px solid var(--card-border);

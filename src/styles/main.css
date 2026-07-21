@@ -1,47 +1,73 @@
-/* 全局主题变量 + 基础样式。深/浅色通过 <html data-theme> 切换，平滑过渡。 */
+/* 全局主题变量 + 基础样式。深/浅色通过 <html data-theme> 切换，平滑过渡。
+   设计取向：贴合中国大陆用户习惯 —— 中文优先字体栈、可信赖蓝主色、
+   实白卡片 + 浅灰底（微信/支付宝式）、分组验证码、柔和分层阴影、克制顺滑动效。 */
 
 :root {
-  --bg: #eef1f6;
-  --bg-grad-1: #e8edf7;
-  --bg-grad-2: #f6f4fb;
-  --card-bg: rgba(255, 255, 255, 0.82);
-  --card-border: rgba(17, 24, 39, 0.06);
-  --text: #16181d;
-  --text-2: #5b6472;
-  --accent: #2f7bff;
-  --accent-2: #0d47a1;
-  --accent-soft: rgba(47, 123, 255, 0.12);
+  /* 背景：柔和冷灰，带极淡渐变，干净不刺眼 */
+  --bg: #f3f5f9;
+  --bg-grad-1: #eef2f9;
+  --bg-grad-2: #f7f5fb;
+
+  /* 卡片：偏实心的白，清晰可读（华人 App 习惯用实白卡片 + 浅灰底，而非厚重毛玻璃） */
+  --card-bg: rgba(255, 255, 255, 0.94);
+  --card-border: rgba(17, 24, 39, 0.07);
+
+  --text: #1a1d24;
+  --text-2: #6b7280;
+
+  /* 主色：干净、可信赖的蓝（贴近 Ant Design 蓝，华人最熟悉的“安全/信任”色） */
+  --accent: #2f6bff;
+  --accent-2: #1c4fe0;
+  --accent-press: #1a47c8;
+  --accent-soft: rgba(47, 107, 255, 0.10);
+
   --input-bg: #ffffff;
   --input-border: rgba(17, 24, 39, 0.12);
+
   --danger: #ef4444;
   --warning: #f59e0b;
-  --shadow: 0 12px 34px rgba(17, 24, 39, 0.10);
-  --shadow-soft: 0 6px 18px rgba(17, 24, 39, 0.06);
-  --radius: 18px;
+
+  /* 阴影：分层、柔和、不厚重 */
+  --shadow: 0 2px 8px rgba(17, 24, 39, 0.05), 0 12px 32px rgba(17, 24, 39, 0.08);
+  --shadow-soft: 0 1px 4px rgba(17, 24, 39, 0.04), 0 6px 18px rgba(17, 24, 39, 0.05);
+  --shadow-press: 0 1px 2px rgba(17, 24, 39, 0.06);
+
+  /* 圆角：统一节奏，移动端偏圆润 */
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-xs: 10px;
+
+  /* 字体 */
+  --font-cn: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Source Han Sans SC', 'Noto Sans CJK SC', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, 'Courier New', monospace;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Vant 主题变量覆盖（浅色） */
-  --van-primary-color: #2f7bff;
-  --van-background: #eef1f6;
+  --van-primary-color: #2f6bff;
+  --van-background: #f3f5f9;
 }
 
 [data-theme='dark'] {
-  --bg: #0e1014;
-  --bg-grad-1: #0c0f15;
-  --bg-grad-2: #121622;
-  --card-bg: rgba(255, 255, 255, 0.045);
+  --bg: #0d0f14;
+  --bg-grad-1: #0b0e14;
+  --bg-grad-2: #11151f;
+  --card-bg: rgba(255, 255, 255, 0.05);
   --card-border: rgba(255, 255, 255, 0.09);
   --text: #f4f6fb;
   --text-2: #9aa4b2;
   --accent: #5b9bff;
   --accent-2: #8db4ff;
+  --accent-press: #4a86e8;
   --accent-soft: rgba(91, 155, 255, 0.16);
   --input-bg: rgba(0, 0, 0, 0.28);
   --input-border: rgba(255, 255, 255, 0.14);
-  --shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
-  --shadow-soft: 0 6px 18px rgba(0, 0, 0, 0.35);
-
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 14px 40px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 1px 4px rgba(0, 0, 0, 0.3), 0 8px 22px rgba(0, 0, 0, 0.35);
+  --shadow-press: 0 1px 2px rgba(0, 0, 0, 0.4);
   --van-primary-color: #5b9bff;
-  --van-background: #0e1014;
+  --van-background: #0d0f14;
   --van-text-color: #f4f6fb;
   --van-cell-background: rgba(255, 255, 255, 0.04);
   --van-popup-background: #14171f;
@@ -65,9 +91,12 @@ body {
     linear-gradient(180deg, var(--bg-grad-1), var(--bg)) fixed;
   background-color: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
-    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-cn);
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   transition: background-color 0.35s ease, color 0.35s ease;
 }
 
@@ -84,7 +113,7 @@ body {
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   border-bottom: 1px solid var(--card-border);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-soft);
 }
 .van-nav-bar__content {
   height: 50px;
@@ -92,7 +121,8 @@ body {
 
 /* 验证码等宽字体 */
 .mono {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 /* 渐变文字（强调色验证码） */
@@ -121,28 +151,28 @@ body {
   right: max(20px, env(safe-area-inset-right));
   bottom: calc(24px + env(safe-area-inset-bottom));
   z-index: 20;
-  width: 58px;
-  height: 58px;
+  width: 56px;
+  height: 56px;
   border: none;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
   font-size: 30px;
   line-height: 1;
-  box-shadow: 0 10px 28px rgba(47, 123, 255, 0.5);
+  box-shadow: 0 8px 22px rgba(47, 107, 255, 0.42), 0 2px 6px rgba(47, 107, 255, 0.3);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.25s ease;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s ease;
 }
 .fab-add:hover {
-  transform: scale(1.08) translateY(-2px);
-  box-shadow: 0 14px 36px rgba(47, 123, 255, 0.6);
+  transform: scale(1.06) translateY(-2px);
+  box-shadow: 0 12px 30px rgba(47, 107, 255, 0.52), 0 2px 6px rgba(47, 107, 255, 0.32);
 }
 .fab-add:active {
-  transform: scale(0.96);
+  transform: scale(0.94);
+  box-shadow: 0 4px 12px rgba(47, 107, 255, 0.4);
 }
 
 /* 通用按钮（非 Vant）按压反馈 */
@@ -153,13 +183,21 @@ body {
   transform: scale(0.9);
 }
 
-/* 表单/内容分区卡片（玻璃卡片） */
+/* 轻量按压反馈工具类 */
+.tap {
+  transition: transform 0.15s var(--ease), opacity 0.15s ease;
+}
+.tap:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* 表单/内容分区卡片（实白卡片 + 浅边框 + 柔和阴影） */
 .section-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(12px) saturate(160%);
   padding: 16px;
   margin-bottom: 14px;
 }
@@ -192,12 +230,12 @@ body {
   gap: 12px;
   width: 100%;
   padding: 16px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   border: 1px dashed var(--input-border);
   background: transparent;
   color: var(--text);
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s var(--ease);
   text-align: left;
   font-size: 15px;
   font-weight: 600;
@@ -207,7 +245,7 @@ body {
   background: var(--accent-soft);
 }
 .action-card:active {
-  transform: scale(0.98);
+  transform: scale(0.985);
 }
 .action-card .ico {
   width: 40px;
@@ -246,7 +284,7 @@ body {
 .glow-btn {
   background: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
   border: none !important;
-  box-shadow: 0 8px 22px rgba(47, 123, 255, 0.4);
+  box-shadow: 0 8px 22px rgba(47, 107, 255, 0.38);
 }
 
 /* 暗色下弱化背景分层 */
@@ -255,4 +293,28 @@ body {
 }
 [data-theme='dark'] .action-card:hover {
   background: rgba(255, 255, 255, 0.06);
+}
+
+/* 入场动画（卡片列表错峰淡入上浮），尊重 reduced-motion */
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 尊重用户的“减少动态效果”系统设置 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

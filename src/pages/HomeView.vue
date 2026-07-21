@@ -265,16 +265,17 @@ import { openCopyFallback } from '../lib/clipboard'
   transform: scale(0.92);
 }
 .risk-banner {
-  margin-top: 50px;
+  margin: 50px 12px 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 1.5;
   color: var(--text-2);
   background: var(--accent-soft);
-  border-bottom: 1px solid var(--card-border);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
 }
 .risk-icon {
   color: var(--accent);
@@ -311,38 +312,43 @@ import { openCopyFallback } from '../lib/clipboard'
 }
 .empty {
   text-align: center;
-  padding: 110px 28px 80px;
+  padding: 96px 28px 72px;
   color: var(--text-2);
+  animation: cardIn 0.5s var(--ease) both;
 }
 .empty-icon {
-  width: 84px;
-  height: 84px;
-  margin: 0 auto 18px;
-  border-radius: 26px;
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 20px;
+  border-radius: 30px;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
-  font-size: 40px;
+  font-size: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 14px 38px rgba(47, 123, 255, 0.3);
+  box-shadow: 0 16px 40px rgba(47, 107, 255, 0.32);
 }
 .empty-title {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
   color: var(--text);
   margin-bottom: 10px;
 }
 .empty-desc {
   font-size: 14px;
-  line-height: 1.6;
-  max-width: 320px;
-  margin: 0 auto 24px;
+  line-height: 1.7;
+  max-width: 300px;
+  margin: 0 auto 26px;
 }
 .empty-btn {
-  height: 42px;
-  padding: 0 26px;
+  height: 44px;
+  padding: 0 28px;
   font-weight: 600;
-  box-shadow: 0 8px 24px rgba(47, 123, 255, 0.35);
+  box-shadow: 0 8px 24px rgba(47, 107, 255, 0.35);
+  transition: transform 0.2s var(--ease);
+}
+.empty-btn:active {
+  transform: scale(0.97);
 }
 </style>
