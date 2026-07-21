@@ -146,6 +146,7 @@ import { computed, ref, watch } from 'vue'
 import { showToast } from 'vant'
 import { base32Decode, base32Encode, parseOtpAuthUri } from '../lib/totp'
 import { decodeQrFromFile } from '../lib/scan'
+import { COLORS } from '../lib/storage'
 import { useI18n } from '../composables/useI18n'
 
 const props = defineProps({
@@ -159,12 +160,6 @@ const visible = computed({
   get: () => props.modelValue,
   set: (v) => emit('update:modelValue', v)
 })
-
-const COLORS = [
-  '#24292e', '#4285f4', '#00a4ef', '#ff9900', '#ff6a00', '#00a4ff',
-  '#0061ff', '#4a154b', '#1da1f2', '#e4405f', '#000000', '#003087',
-  '#f38020', '#10b981', '#8b5cf6'
-]
 
 const issuer = ref('')
 const account = ref('')
@@ -291,7 +286,8 @@ function onSave() {
 }
 
 function onDelete() {
-  if (props.editing) emit('delete', props.editing.id)
+  if (!props.editing) return
+  emit('delete', props.editing.id)
   visible.value = false
 }
 </script>

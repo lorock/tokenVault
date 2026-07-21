@@ -253,7 +253,7 @@ function saveSite(payload) {
     const idx = sites.value.findIndex((s) => s.id === payload.id)
     if (idx >= 0) sites.value[idx] = { ...sites.value[idx], ...payload }
   } else {
-    sites.value.push({ id: uid(), createdAt: Date.now(), ...payload })
+    sites.value.push({ ...payload, id: uid(), createdAt: Date.now() })
   }
   persist()
   showToast(t('toast.saved'))
@@ -261,8 +261,13 @@ function saveSite(payload) {
 
 async function deleteSite(id) {
   if (!id) return
+  const s = sites.value.find((x) => x.id === id)
+  const name = s ? s.issuer || s.account : ''
   try {
-    await showConfirmDialog({ title: t('confirm.deleteTitle'), message: t('confirm.deleteMsg') })
+    await showConfirmDialog({
+      title: t('confirm.deleteTitle'),
+      message: name ? t('site.confirmDeleteMsg', { name }) : t('confirm.deleteMsg')
+    })
   } catch {
     return
   }

@@ -2,6 +2,16 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.6.1] - 2026-07-21
+
+### 修复与优化（手动修复复核）
+
+- **修复删除确认弹窗重复**：原先 `SiteCard` 与 `HomeView.deleteSite` 各自弹一次确认框，点击删除会连续弹出两个对话框。现将确认收敛到 `HomeView` 一处统一处理，并带上站点名称（「确定删除「{name}」？」），提示更明确。
+- **抽离共享调色板**：将品牌色数组 `COLORS` 抽到 `storage.js` 导出，`SiteFormDialog` 改为 import，消除重复定义、保证默认色一致。
+- **`period` 校验一致**：`SiteCard` 的 `period` 计算属性与 `storage.normalizeSite` 对齐，统一采用 `>0` 且有限时取原值、否则回退 30，避免异常值导致验证码错位。
+- **新建站点身份更稳健**：`saveSite` 中 `id`/`createdAt` 置于展开之后，保证新建站点一定拿到新 `uid` 与新鲜时间戳。
+- **表单删除守卫**：`SiteFormDialog.onDelete` 增加 `!editing` 早返回，避免非编辑态误触发删除。
+
 ## [2.6.0] - 2026-07-21
 
 ### 修复与优化（卡片一致性 + 健壮性）

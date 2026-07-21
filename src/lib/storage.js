@@ -1,4 +1,9 @@
-// 本地存储：站点数据持久化到 localStorage
+export const COLORS = [
+  '#24292e', '#4285f4', '#00a4ef', '#ff9900', '#ff6a00', '#00a4ff',
+  '#0061ff', '#4a154b', '#1da1f2', '#e4405f', '#000000', '#003087',
+  '#f38020', '#10b981', '#8b5cf6'
+]
+
 const KEY = 'totp_sites_v1'
 
 export function loadSites() {
@@ -25,10 +30,10 @@ export function normalizeSite(s) {
     // 仅允许标准位数 6 / 8；导入备份若含非标准位数（如 4、10）统一钳制为 6，
     // 避免生成与主流验证器 / 服务端不兼容的验证码。
     digits: [6, 8].includes(Number(s.digits)) ? Number(s.digits) : 6,
-    period: s.period || 30,
+    period: Number.isFinite(s.period) && s.period > 0 ? s.period : 30,
     type: s.type === 'hotp' ? 'hotp' : 'totp',
     counter: Number.isFinite(s.counter) ? s.counter : 0,
-    color: s.color || '#4f8cff',
+    color: s.color || COLORS[0],
     // 创建时间戳：用于「最近添加」排序。旧备份/历史数据无此字段时回退 0（视为最旧），
     // 保证导入的老数据不会因缺字段而报错或排在异常位置。
     createdAt: Number.isFinite(s.createdAt) ? s.createdAt : 0

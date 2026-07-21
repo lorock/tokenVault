@@ -50,7 +50,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { showToast, showConfirmDialog } from 'vant'
+import { showToast } from 'vant'
 import { totp, hotp } from '../lib/totp'
 import { copyText } from '../lib/clipboard'
 import { useI18n } from '../composables/useI18n'
@@ -65,7 +65,7 @@ const { t } = useI18n()
 const code = ref('')
 const isHotp = computed(() => props.site.type === 'hotp')
 const counterVal = computed(() => props.site.counter || 0)
-const period = computed(() => props.site.period || 30)
+const period = computed(() => Number.isFinite(props.site.period) && props.site.period > 0 ? props.site.period : 30)
 const counter = computed(() => Math.floor(props.now / 1000 / period.value))
 const remaining = computed(() => period.value - (Math.floor(props.now / 1000) % period.value))
 const progress = computed(() => (remaining.value / period.value) * 100)
@@ -131,16 +131,8 @@ function advance() {
   emit('advance', props.site.id)
 }
 
-async function onDelete() {
-  try {
-    await showConfirmDialog({
-      title: t('confirm.deleteTitle'),
-      message: t('site.confirmDeleteMsg', { name: props.site.issuer || props.site.account })
-    })
-    emit('delete', props.site.id)
-  } catch {
-    // 取消
-  }
+function onDelete() {
+  emit('delete', props.site.id)
 }
 </script>
 
