@@ -7,11 +7,11 @@
     @update:show="(v) => (visible = v)"
   >
     <div class="share-wrap">
-      <div class="share-title">扫码绑定到其他设备</div>
+      <div class="share-title">{{ t('share.title') }}</div>
       <img v-if="qrUrl" :src="qrUrl" class="share-img" alt="otpauth QR" />
       <div class="share-issuer">{{ site && (site.issuer || site.account) }}</div>
-      <van-button block type="primary" plain @click="copyUri">复制 otpauth URI</van-button>
-      <div class="share-hint">用另一台设备的验证器 App 扫描上方二维码即可完成绑定</div>
+      <van-button block type="primary" plain @click="copyUri">{{ t('share.copyUri') }}</van-button>
+      <div class="share-hint">{{ t('share.hint') }}</div>
     </div>
   </van-popup>
 </template>
@@ -22,12 +22,14 @@ import { showToast } from 'vant'
 import { buildOtpAuthUri } from '../lib/totp'
 import { generateQrDataUrl } from '../lib/qr'
 import { copyText } from '../lib/clipboard'
+import { useI18n } from '../composables/useI18n'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   site: { type: Object, default: null }
 })
 const emit = defineEmits(['update:modelValue'])
+const { t } = useI18n()
 const visible = computed({
   get: () => props.modelValue,
   set: (v) => emit('update:modelValue', v)
@@ -42,7 +44,7 @@ watch(visible, async (v) => {
       qrUrl.value = await generateQrDataUrl(uri)
     } catch {
       qrUrl.value = ''
-      showToast('二维码生成失败')
+      showToast(t('share.qrFailed'))
     }
   }
 })
@@ -50,7 +52,7 @@ watch(visible, async (v) => {
 async function copyUri() {
   if (!props.site) return
   const ok = await copyText(buildOtpAuthUri(props.site))
-  if (ok) showToast('已复制 URI')
+  if (ok) showToast(t('share.uriCopied'))
 }
 </script>
 

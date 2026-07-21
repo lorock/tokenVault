@@ -1,17 +1,27 @@
 <template>
   <footer class="app-footer">
     <nav class="footer-links">
-      <router-link to="/privacy" class="footer-link">隐私政策</router-link>
+      <router-link to="/privacy" class="footer-link">{{ t('footer.privacy') }}</router-link>
       <span class="footer-sep">·</span>
-      <router-link to="/disclaimer" class="footer-link">免责声明</router-link>
+      <router-link to="/disclaimer" class="footer-link">{{ t('footer.disclaimer') }}</router-link>
+      <span class="footer-sep">·</span>
+      <button class="footer-link footer-lang" type="button" @click="toggleLang">
+        {{ locale === 'zh' ? 'EN' : '中文' }}
+      </button>
     </nav>
-    <div class="footer-copyright">© 2026 TOTP 验证器 · 保留所有权利</div>
-    <div class="footer-note">本工具为开源前端应用，所有数据仅存储于您的本地设备</div>
+    <div class="footer-copyright">{{ t('footer.copyright') }}</div>
+    <div class="footer-note">{{ t('footer.note') }}</div>
   </footer>
 </template>
 
 <script setup>
-// 纯展示组件，无额外逻辑
+import { useI18n } from '../composables/useI18n'
+
+const { locale, t, setLocale } = useI18n()
+
+function toggleLang() {
+  setLocale(locale.value === 'zh' ? 'en' : 'zh')
+}
 </script>
 
 <style scoped>
@@ -40,6 +50,13 @@
 }
 .footer-link:active {
   opacity: 0.6;
+}
+.footer-lang {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
 }
 .footer-sep {
   color: var(--text-2);

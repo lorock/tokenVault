@@ -1,6 +1,7 @@
 // 复制 + 微信兜底。剪贴板 API / execCommand 在微信内置浏览器常不可用，
 // 此时弹出可长按选择的文本浮层，让用户手动复制。
 import { reactive } from 'vue'
+import { useI18n } from '../composables/useI18n'
 
 export const copyFallbackState = reactive({
   visible: false,
@@ -9,8 +10,9 @@ export const copyFallbackState = reactive({
 })
 
 export function openCopyFallback(text, hint) {
+  const { t } = useI18n()
   copyFallbackState.text = text
-  copyFallbackState.hint = hint || '若自动复制失败，请长按上方文字手动复制'
+  copyFallbackState.hint = hint || t('wechat.copyFallbackDefault')
   copyFallbackState.visible = true
 }
 

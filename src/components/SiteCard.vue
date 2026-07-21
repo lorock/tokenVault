@@ -5,10 +5,10 @@
         {{ initial }}
       </div>
       <div class="sc-meta">
-        <div class="sc-issuer">{{ site.issuer || '未命名站点' }}</div>
+        <div class="sc-issuer">{{ site.issuer || t('site.unnamed') }}</div>
         <div class="sc-account">{{ site.account }}</div>
       </div>
-      <van-button size="mini" plain @click="$emit('edit', site)">编辑</van-button>
+      <van-button size="mini" plain @click="$emit('edit', site)">{{ t('common.edit') }}</van-button>
     </div>
 
     <div class="sc-code mono grad-text" @click="copyCode">
@@ -20,11 +20,11 @@
     </div>
 
     <div class="sc-actions">
-      <span class="sc-remaining" :class="barState">{{ remaining }}s 后刷新</span>
+      <span class="sc-remaining" :class="barState">{{ t('site.secondsLeft', { n: remaining }) }}</span>
       <div class="sc-btns">
-        <van-button size="mini" plain @click="copyCode">复制</van-button>
-        <van-button size="mini" plain @click="$emit('share', site)">分享</van-button>
-        <van-button size="mini" plain type="danger" @click="onDelete">删除</van-button>
+        <van-button size="mini" plain @click="copyCode">{{ t('common.copy') }}</van-button>
+        <van-button size="mini" plain @click="$emit('share', site)">{{ t('common.share') }}</van-button>
+        <van-button size="mini" plain type="danger" @click="onDelete">{{ t('common.delete') }}</van-button>
       </div>
     </div>
   </div>
@@ -35,12 +35,14 @@ import { computed, ref, watch } from 'vue'
 import { showToast, showConfirmDialog } from 'vant'
 import { totp } from '../lib/totp'
 import { copyText } from '../lib/clipboard'
+import { useI18n } from '../composables/useI18n'
 
 const props = defineProps({
   site: { type: Object, required: true },
   now: { type: Number, required: true }
 })
 const emit = defineEmits(['edit', 'share', 'delete'])
+const { t } = useI18n()
 
 const code = ref('')
 const period = computed(() => props.site.period || 30)
@@ -72,12 +74,15 @@ watch(counter, computeCode, { immediate: true })
 
 async function copyCode() {
   const ok = await copyText(code.value)
-  if (ok) showToast('已复制验证码')
+  if (ok) showToast(t('site.copiedCode'))
 }
 
 async function onDelete() {
   try {
-    await showConfirmDialog({ title: '删除站点', message: `确定删除「${props.site.issuer || props.site.account}」？` })
+    await showConfirmDialog({
+      title: t('confirm.deleteTitle'),
+      message: t('site.confirmDeleteMsg', { name: props.site.issuer || props.site.account })
+    })
     emit('delete', props.site.id)
   } catch {
     // 取消

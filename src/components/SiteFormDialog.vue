@@ -9,28 +9,28 @@
     <div class="form-wrap">
       <div class="form-handle"></div>
       <div class="form-head">
-        <div class="form-title">{{ editing ? '编辑站点' : '添加站点' }}</div>
-        <div class="form-sub">{{ editing ? '修改账户信息后保存' : '添加新的两步验证站点' }}</div>
+        <div class="form-title">{{ editing ? t('form.editTitle') : t('form.addTitle') }}</div>
+        <div class="form-sub">{{ editing ? t('form.editSub') : t('form.addSub') }}</div>
       </div>
 
       <!-- 账户信息 -->
       <div class="section-card">
         <div class="section-title">
           <span class="icon"><van-icon name="user-o" /></span>
-          账户信息
+          {{ t('form.accountInfo') }}
         </div>
         <van-cell-group inset :border="false">
-          <van-field v-model="issuer" label="站点名称" placeholder="如 GitHub / 阿里云" />
-          <van-field v-model="account" label="账户名" placeholder="如 user@example.com" />
+          <van-field v-model="issuer" :label="t('form.issuer')" :placeholder="t('form.issuerPh')" />
+          <van-field v-model="account" :label="t('form.account')" :placeholder="t('form.accountPh')" />
           <van-field
             v-model="secret"
-            label="密钥"
-            placeholder="Base32 密钥"
+            :label="t('form.secret')"
+            :placeholder="t('form.secretPh')"
             :error-message="secretError"
           >
             <template #button>
               <van-button size="small" plain type="primary" @click="genSecret">
-                <van-icon name="replay" /> 随机
+                <van-icon name="replay" /> {{ t('form.random') }}
               </van-button>
             </template>
           </van-field>
@@ -41,10 +41,10 @@
       <div class="section-card">
         <div class="section-title">
           <span class="icon"><van-icon name="shield-o" /></span>
-          安全选项
+          {{ t('form.security') }}
         </div>
         <div class="opt-row">
-          <label>哈希算法</label>
+          <label>{{ t('form.algo') }}</label>
           <van-radio-group v-model="algo" direction="horizontal">
             <van-radio name="SHA-1">SHA-1</van-radio>
             <van-radio name="SHA-256">SHA-256</van-radio>
@@ -52,21 +52,21 @@
           </van-radio-group>
         </div>
         <div class="opt-row">
-          <label>验证码位数</label>
+          <label>{{ t('form.digits') }}</label>
           <van-radio-group v-model="digits" direction="horizontal">
-            <van-radio name="6">6 位</van-radio>
-            <van-radio name="8">8 位</van-radio>
+            <van-radio name="6">{{ t('form.digits6') }}</van-radio>
+            <van-radio name="8">{{ t('form.digits8') }}</van-radio>
           </van-radio-group>
         </div>
         <div class="opt-row">
-          <label>刷新步长</label>
+          <label>{{ t('form.period') }}</label>
           <van-radio-group v-model="period" direction="horizontal">
-            <van-radio name="30">30 秒</van-radio>
-            <van-radio name="60">60 秒</van-radio>
+            <van-radio name="30">{{ t('form.period30') }}</van-radio>
+            <van-radio name="60">{{ t('form.period60') }}</van-radio>
           </van-radio-group>
         </div>
         <div class="opt-row color-row">
-          <label>图标颜色</label>
+          <label>{{ t('form.color') }}</label>
           <div class="color-grid">
             <button
               v-for="c in COLORS"
@@ -86,21 +86,21 @@
       <div class="section-card">
         <div class="section-title">
           <span class="icon"><van-icon name="records" /></span>
-          快速录入
+          {{ t('form.quick') }}
         </div>
         <button class="action-card" type="button" @click="pickFile">
           <span class="ico"><van-icon name="scan" /></span>
           <span class="meta">
-            上传二维码图片
-            <span class="sub">支持相册截图 / 电脑本地图片</span>
+            {{ t('form.uploadQr') }}
+            <span class="sub">{{ t('form.uploadQrSub') }}</span>
           </span>
           <van-icon name="arrow" class="arrow" />
         </button>
         <button class="action-card secondary" type="button" @click="showPaste = !showPaste">
           <span class="ico"><van-icon name="link-o" /></span>
           <span class="meta">
-            粘贴 otpauth URI
-            <span class="sub">含 otpauth://totp/... 的完整链接</span>
+            {{ t('form.pasteUri') }}
+            <span class="sub">{{ t('form.pasteUriSub') }}</span>
           </span>
           <van-icon name="arrow-down" class="arrow" :class="{ open: showPaste }" />
         </button>
@@ -110,9 +110,9 @@
             v-model="pasteUri"
             type="textarea"
             rows="2"
-            placeholder="粘贴 otpauth://totp/... 开头的完整 URI"
+            :placeholder="t('form.pastePh')"
           />
-          <van-button size="small" type="primary" round @click="parsePaste">解析 URI</van-button>
+          <van-button size="small" type="primary" round @click="parsePaste">{{ t('form.parseUri') }}</van-button>
         </div>
       </div>
 
@@ -120,10 +120,10 @@
 
       <div class="form-actions">
         <van-button v-if="editing" block type="danger" plain round @click="onDelete">
-          <van-icon name="delete-o" /> 删除站点
+          <van-icon name="delete-o" /> {{ t('form.deleteBtn') }}
         </van-button>
         <van-button block class="glow-btn" type="primary" round @click="onSave">
-          <van-icon name="success" /> 保存
+          <van-icon name="success" /> {{ t('form.saveBtn') }}
         </van-button>
       </div>
     </div>
@@ -135,12 +135,14 @@ import { computed, ref, watch } from 'vue'
 import { showToast } from 'vant'
 import { base32Decode, base32Encode, parseOtpAuthUri } from '../lib/totp'
 import { decodeQrFromFile } from '../lib/scan'
+import { useI18n } from '../composables/useI18n'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   editing: { type: Object, default: null }
 })
 const emit = defineEmits(['update:modelValue', 'save', 'delete'])
+const { t } = useI18n()
 
 const visible = computed({
   get: () => props.modelValue,
@@ -210,18 +212,18 @@ async function onFile(e) {
   if (!file) return
   try {
     const data = await decodeQrFromFile(file)
-    if (!data) return showToast('未识别到二维码，请调整图片')
+    if (!data) return showToast(t('form.noQr'))
     fillFromParsed(parseOtpAuthUri(data))
-    showToast('已识别，请确认后保存')
+    showToast(t('form.recognized'))
   } catch (err) {
-    showToast('识别失败: ' + err.message)
+    showToast(t('form.recogFailed', { msg: err.message }))
   }
   e.target.value = ''
 }
 
 function parsePaste() {
   const uri = pasteUri.value.trim()
-  if (!uri) return showToast('请输入 URI')
+  if (!uri) return showToast(t('form.enterUri'))
   try {
     fillFromParsed(parseOtpAuthUri(uri))
     showPaste.value = false
@@ -242,12 +244,12 @@ function fillFromParsed(p) {
 
 function onSave() {
   secret.value = secret.value.trim().toUpperCase().replace(/\s/g, '')
-  if (!issuer.value.trim()) return showToast('请输入站点名称')
-  if (!secret.value) return showToast('请输入密钥或扫描二维码')
+  if (!issuer.value.trim()) return showToast(t('form.enterIssuer'))
+  if (!secret.value) return showToast(t('form.enterSecret'))
   try {
     base32Decode(secret.value)
   } catch {
-    secretError.value = '密钥格式无效（需 Base32）'
+    secretError.value = t('form.invalidSecret')
     return
   }
   emit('save', {

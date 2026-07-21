@@ -2,16 +2,19 @@
   <div class="home">
     <van-nav-bar :border="false">
       <template #title>
-        <span class="brand-title">TOTP 验证器</span>
+        <span class="brand-title">{{ t('brand') }}</span>
       </template>
       <template #right>
-        <button class="nav-btn" title="切换主题" @click="onTheme">
+        <button class="nav-btn" :title="t('nav.lang')" @click="toggleLang">
+          <span class="lang-pill">{{ locale === 'zh' ? 'EN' : '中' }}</span>
+        </button>
+        <button class="nav-btn" :title="t('nav.switchTheme')" @click="onTheme">
           <van-icon name="bulb-o" />
         </button>
-        <button class="nav-btn" title="导出备份" @click="exportBackup">
+        <button class="nav-btn" :title="t('nav.export')" @click="exportBackup">
           <van-icon name="upgrade" />
         </button>
-        <button class="nav-btn" title="导入备份" @click="importBackup">
+        <button class="nav-btn" :title="t('nav.import')" @click="importBackup">
           <van-icon name="down" />
         </button>
       </template>
@@ -19,19 +22,19 @@
 
     <div v-if="storageOk ? !riskDismissed : true" class="risk-banner">
       <van-icon name="warning-o" class="risk-icon" />
-      <span class="risk-text">{{ storageOk ? '数据仅保存在此设备本地，清理微信/浏览器缓存会丢失，建议定期导出备份。' : '当前环境无法保存数据（隐私模式/存储被禁用），请先「去导出」备份到别处。' }}</span>
-      <button class="risk-action" @click="exportBackup">去导出</button>
-      <button v-if="storageOk" class="risk-close" title="不再提示" @click="dismissRisk">×</button>
+      <span class="risk-text">{{ storageOk ? t('home.riskLocal') : t('home.riskDisabled') }}</span>
+      <button class="risk-action" @click="exportBackup">{{ t('home.riskExport') }}</button>
+      <button v-if="storageOk" class="risk-close" :title="t('home.riskDismiss')" @click="dismissRisk">×</button>
     </div>
 
     <div v-if="sites.length === 0" class="empty">
       <div class="empty-icon">
         <van-icon name="shield-o" />
       </div>
-      <div class="empty-title">还没有站点</div>
-      <div class="empty-desc">添加你的第一个两步验证站点，支持二维码图片扫描与 otpauth URI 粘贴。</div>
+      <div class="empty-title">{{ t('home.emptyTitle') }}</div>
+      <div class="empty-desc">{{ t('home.emptyDesc') }}</div>
       <van-button round type="primary" class="empty-btn" @click="addSite">
-        <van-icon name="plus" /> 添加站点
+        <van-icon name="plus" /> {{ t('home.addSite') }}
       </van-button>
     </div>
 
@@ -44,7 +47,7 @@
       @delete="deleteSite"
     />
 
-    <button class="fab-add" title="添加站点" @click="addSite">+</button>
+    <button class="fab-add" :title="t('nav.addSite')" @click="addSite">+</button>
 
     <SiteFormDialog v-model="formVisible" :editing="editingSite" @save="saveSite" @delete="deleteSite" />
     <ShareQrDialog v-model="shareVisible" :site="shareSiteData" />
@@ -63,9 +66,15 @@ import ShareQrDialog from '../components/ShareQrDialog.vue'
 import CopyFallbackOverlay from '../components/CopyFallbackOverlay.vue'
 import { loadSites, saveSites, uid, isStorageAvailable } from '../lib/storage'
 import { useTheme } from '../composables/useTheme'
+import { useI18n } from '../composables/useI18n'
 
 const themeApi = useTheme()
 const resolved = themeApi.resolved
+const { locale, t, setLocale } = useI18n()
+
+function toggleLang() {
+  setLocale(locale.value === 'zh' ? 'en' : 'zh')
+}
 
 const sites = ref(loadSites())
 const now = ref(Date.now())
@@ -112,13 +121,13 @@ function saveSite(payload) {
     sites.value.push({ id: uid(), ...payload })
   }
   persist()
-  showToast('已保存')
+  showToast(t('toast.saved'))
 }
 
 async function deleteSite(id) {
   if (!id) return
   try {
-    await showConfirmDialog({ title: '删除站点', message: '确定删除该站点？' })
+    await showConfirmDialog({ title: t('confirm.deleteTitle'), message: t('confirm.deleteMsg') })
   } catch {
     return
   }
@@ -133,11 +142,11 @@ function shareSite(site) {
 
 function onTheme() {
   themeApi.cycle()
-  showToast('主题：' + themeApi.label())
+  showToast(t('theme.toast', { label: t('theme.' + themeApi.label()) }))
 }
 
 function exportBackup() {
-  if (sites.value.length === 0) return showToast('没有站点可导出')
+  if (sites.value.length === 0) return showToast(t('toast.noSiteExport'))
   const backup = {
     version: 1,
     exportedAt: new Date().toISOString(),
@@ -155,10 +164,7 @@ function exportBackup() {
   const json = JSON.stringify(backup, null, 2)
   const isWeChat = /micromessenger/i.test(navigator.userAgent)
   if (isWeChat) {
-    openCopyFallback(
-      json,
-      '微信内不支持直接下载文件。请长按下方 JSON 文本复制，保存到「文件传输助手」或微信笔记中备份。'
-    )
+    openCopyFallback(json, t('wechat.downloadHint'))
     return
   }
   try {
@@ -172,9 +178,9 @@ function exportBackup() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    showToast(`已导出 ${sites.value.length} 个站点`)
+    showToast(t('toast.exported', { n: sites.value.length }))
   } catch {
-    openCopyFallback(json, '当前环境不支持文件下载，请长按下方 JSON 文本复制保存。')
+    openCopyFallback(json, t('wechat.fallbackHint'))
   }
 }
 
@@ -210,13 +216,13 @@ async function handleImportFile(e) {
       (s) => !existingKeys.has(`${s.issuer}||${s.account}||${s.secret}`)
     )
     if (unique.length === 0) {
-      return showToast('所有站点已存在，无需导入')
+      return showToast(t('toast.importAllExist'))
     }
     sites.value.push(...unique)
     persist()
-    showToast(`成功导入 ${unique.length} 个站点`)
+    showToast(t('toast.imported', { n: unique.length }))
   } catch (err) {
-    showToast('导入失败: ' + err.message)
+    showToast(t('toast.importFailed', { msg: err.message }))
   }
   e.target.value = ''
 }
@@ -227,6 +233,24 @@ import { openCopyFallback } from '../lib/clipboard'
 <style scoped>
 .home {
   flex: 1 0 auto;
+}
+.lang-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+.nav-btn:active .lang-pill {
+  transform: scale(0.92);
 }
 .risk-banner {
   margin-top: 50px;

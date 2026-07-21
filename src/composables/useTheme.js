@@ -45,7 +45,7 @@ function cycle() {
 }
 
 function label() {
-  return { light: '浅色', dark: '深色', system: '跟随系统' }[theme.value]
+  return theme.value // 'light' | 'dark' | 'system'，由调用方经 i18n 翻译
 }
 
 export function useTheme() {

@@ -14,7 +14,7 @@
         :value="copyFallbackState.text"
       ></textarea>
       <div class="cf-actions">
-        <van-button block type="primary" @click="doCopy">复制</van-button>
+        <van-button block type="primary" @click="doCopy">{{ t('cf.copy') }}</van-button>
       </div>
     </div>
   </van-popup>
@@ -24,7 +24,9 @@
 import { ref, watch, nextTick } from 'vue'
 import { showToast } from 'vant'
 import { copyFallbackState } from '../lib/clipboard'
+import { useI18n } from '../composables/useI18n'
 
+const { t } = useI18n()
 const ta = ref(null)
 
 watch(
@@ -56,7 +58,7 @@ function doCopy() {
     ok = false
   }
   document.body.removeChild(tmp)
-  showToast(ok ? '已复制' : '请长按文字手动复制')
+  showToast(ok ? t('cf.copied') : t('wechat.manualCopy'))
 }
 </script>
 
