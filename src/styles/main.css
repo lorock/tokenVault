@@ -78,6 +78,18 @@ body {
   padding-bottom: calc(96px + env(safe-area-inset-bottom));
 }
 
+/* 全局导航栏：通栏毛玻璃背景（首页 / 合规页共用），三主题自适应 */
+.van-nav-bar {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid var(--card-border);
+  box-shadow: var(--shadow);
+}
+.van-nav-bar__content {
+  height: 50px;
+}
+
 /* 验证码等宽字体 */
 .mono {
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace;
