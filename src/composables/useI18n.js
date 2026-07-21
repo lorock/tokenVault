@@ -23,7 +23,8 @@ const messages = {
       export: '导出备份',
       import: '导入备份',
       addSite: '添加站点',
-      lang: '语言'
+      lang: '语言',
+      home: '首页'
     },
     theme: {
       light: '浅色',
@@ -143,7 +144,8 @@ const messages = {
       export: 'Export backup',
       import: 'Import backup',
       addSite: 'Add site',
-      lang: 'Language'
+      lang: 'Language',
+      home: 'Home'
     },
     theme: {
       light: 'Light',

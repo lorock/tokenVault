@@ -1,6 +1,8 @@
 <template>
   <div class="legal-page">
-    <van-nav-bar :title="t('legal.disclaimerTitle')" left-arrow :border="false" @click-left="goBack" />
+    <van-nav-bar :title="t('legal.disclaimerTitle')" left-arrow :border="false" @click-left="goHome" />
+
+    <Breadcrumb :label="t('legal.disclaimerTitle')" />
 
     <div class="legal-body">
       <p class="legal-updated">{{ t('legal.updated') }}</p>
@@ -21,14 +23,15 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from '../composables/useI18n'
 import { disclaimer } from '../lib/legal'
+import Breadcrumb from '../components/Breadcrumb.vue'
 
 const router = useRouter()
 const { locale, t } = useI18n()
 const content = computed(() => disclaimer[locale.value] || disclaimer.zh)
 
-function goBack() {
-  if (window.history.length > 1) router.back()
-  else router.push('/')
+// 面包屑「首页」始终直达首页，避免历史栈累积导致多次点击才能返回
+function goHome() {
+  router.push('/')
 }
 </script>
 
