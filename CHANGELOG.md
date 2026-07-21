@@ -2,6 +2,22 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.7.0] - 2026-07-21
+
+### 新增（生产就绪 · 安全与健壮性）
+
+- **本地加密保险库（P0）**：所有站点以 AES-256-GCM 信封加密存储。随机数据密钥 `DEK` 加密站点，主密码经 `PBKDF2`（25 万次迭代）派生密钥包装 `DEK` 后落盘；明文密钥永不离盘，解锁后仅驻留内存，锁屏即清除。新增 `LockScreen` 门禁（设置 / 解锁主密码，可选生物识别）。
+- **可选生物识别解锁（WebAuthn PRF）**：平台认证器（指纹 / 面容）派生密钥独立解锁，与主密码并列双路径，不依赖系统钥匙串。
+- **离线可用（P0）**：新增 Service Worker（`public/sw.js`）缓存应用外壳，无网络仍可查看站点；补 `manifest.webmanifest` 支持「添加到主屏幕」独立运行（PWA）。
+- **安全上下文守卫（P0）**：非 HTTPS / localhost 时 `main.js` 展示提示页而非崩溃，避免 Web Crypto 不可用导致白屏。
+- **安全响应头（P0）**：`index.html` 增加 CSP / `Referrer-Policy` / `X-Content-Type-Options` meta；`public/_headers` 为 Netlify / Cloudflare Pages 预设 CSP、`X-Frame-Options: DENY`、`frame-ancestors 'none'`、HSTS、`Permissions-Policy`。
+- **全局错误边界（P1）**：`App.vue` 接入 `onErrorCaptured` 与 `app.config.errorHandler`，异常时展示兜底 UI，避免整页崩溃。
+- **导入合并 / 覆盖（P1）**：导入备份弹窗提供「合并 / 覆盖」选择，修复原 `replace` 标记未生效的缺陷，避免误清已有数据。
+- **可访问性（P1）**：全局 `:focus-visible` 键盘焦点轮廓；尊重 `prefers-reduced-motion`；按钮补 `aria-label`；移除 `user-scalable=no` 缩放限制。
+- **性能（P1）**：Vant 改为按需引入（`src/plugins/vant.js`），表单 / 分享弹窗 `defineAsyncComponent` 懒加载，减小首屏体积。
+- **自动化测试（P0）**：新增 `test/`（`node --test`）覆盖 RFC 4226 HOTP(SHA-1) 权威向量、SHA-256/512 与 Node crypto 交叉验证、TOTP 多算法、otpauth URI 往返、字段归一化、加密保险库加解密 / 改密 / 错误密码失败。
+- **CI / 许可证 / 文档（P2）**：GitHub Actions 自动跑测试 + 构建；新增 MIT `LICENSE`；README 增补安全架构、部署安全头与 PWA 说明。
+
 ## [2.6.1] - 2026-07-21
 
 ### 修复与优化（手动修复复核）

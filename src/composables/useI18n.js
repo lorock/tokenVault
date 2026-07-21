@@ -30,7 +30,8 @@ const messages = {
       import: '导入备份',
       addSite: '添加站点',
       lang: '语言',
-      home: '首页'
+      home: '首页',
+      lock: '锁定'
     },
     theme: {
       light: '浅色',
@@ -56,6 +57,12 @@ const messages = {
       noResultDesc: '换个关键词，或清除搜索条件',
       clearSearch: '清除搜索'
     },
+    import: {
+      title: '发现 {n} 个新站点',
+      desc: '选择导入方式：合并将追加到现有列表，覆盖将清空现有数据。',
+      merge: '合并导入（{n} 个）',
+      replace: '覆盖全部'
+    },
     toast: {
       saved: '已保存',
       noSiteExport: '没有站点可导出',
@@ -69,6 +76,29 @@ const messages = {
     confirm: {
       deleteTitle: '删除站点',
       deleteMsg: '确定删除该站点？'
+    },
+    lock: {
+      setupTitle: '设置主密码',
+      setupSub: '主密码用于加密本机存储的验证码密钥，忘记将无法恢复，请牢记。',
+      unlockTitle: '解锁令牌盒',
+      unlockSub: '输入主密码以查看你的验证码',
+      password: '主密码',
+      passwordPh: '请输入主密码',
+      confirm: '确认密码',
+      confirmPh: '再次输入主密码',
+      create: '创建并加密',
+      unlock: '解锁',
+      useBio: '使用指纹 / 面容',
+      forgot: '忘记密码？',
+      enableBio: '启用生物识别（指纹/面容）快速解锁',
+      migrateHint: '检测到旧版明文数据，将在加密后自动迁移',
+      resetTitle: '重置并清除全部数据',
+      resetMsg: '此操作会清空本设备上的所有站点（含已加密数据），且无法撤销。建议先导出备份。',
+      resetConfirm: '清空并重置',
+      errBadPassword: '主密码错误',
+      errCrypto: '当前环境不支持加密运算，请使用 HTTPS 打开',
+      errSetup: '创建失败，请重试',
+      errUnlock: '解锁失败，请重试'
     },
     wechat: {
       downloadHint: '微信内不支持直接下载文件。请长按下方 JSON 文本复制，保存到「文件传输助手」或微信笔记中备份。',
@@ -152,6 +182,11 @@ const messages = {
       privacyTitle: '隐私政策',
       disclaimerTitle: '免责声明',
       updated: '最后更新：2026-07-21'
+    },
+    app: {
+      errorTitle: '出错了',
+      errorDesc: '应用运行时发生异常，可刷新页面重试。',
+      retry: '刷新重试'
     }
   },
   en: {
@@ -171,7 +206,8 @@ const messages = {
       import: 'Import backup',
       addSite: 'Add site',
       lang: 'Language',
-      home: 'Home'
+      home: 'Home',
+      lock: 'Lock'
     },
     theme: {
       light: 'Light',
@@ -197,6 +233,12 @@ const messages = {
       noResultDesc: 'Try a different keyword, or clear the search',
       clearSearch: 'Clear'
     },
+    import: {
+      title: '{n} new site(s) found',
+      desc: 'Choose how to import: merge appends to your current list; replace erases existing data.',
+      merge: 'Merge import ({n})',
+      replace: 'Replace all'
+    },
     toast: {
       saved: 'Saved',
       noSiteExport: 'No sites to export',
@@ -210,6 +252,29 @@ const messages = {
     confirm: {
       deleteTitle: 'Delete Site',
       deleteMsg: 'Are you sure you want to delete this site?'
+    },
+    lock: {
+      setupTitle: 'Set master password',
+      setupSub: 'The master password encrypts the 2FA secrets stored on this device. If lost, data cannot be recovered — remember it.',
+      unlockTitle: 'Unlock TokenVault',
+      unlockSub: 'Enter your master password to view codes',
+      password: 'Master password',
+      passwordPh: 'Enter master password',
+      confirm: 'Confirm',
+      confirmPh: 'Re-enter master password',
+      create: 'Create & encrypt',
+      unlock: 'Unlock',
+      useBio: 'Use fingerprint / face',
+      forgot: 'Forgot password?',
+      enableBio: 'Enable biometric (fingerprint / face) quick unlock',
+      migrateHint: 'Legacy plaintext data detected — it will be encrypted and migrated automatically',
+      resetTitle: 'Reset and erase all data',
+      resetMsg: 'This erases all sites on this device (including encrypted data) and cannot be undone. Export a backup first.',
+      resetConfirm: 'Erase & reset',
+      errBadPassword: 'Wrong master password',
+      errCrypto: 'Cryptographic operations are unavailable here. Please use HTTPS.',
+      errSetup: 'Setup failed, please retry',
+      errUnlock: 'Unlock failed, please retry'
     },
     wechat: {
       downloadHint: 'Direct file download is not supported in WeChat. Long-press the JSON text below to copy, then save it to "File Transfer" or WeChat Notes as a backup.',
@@ -293,6 +358,11 @@ const messages = {
       privacyTitle: 'Privacy Policy',
       disclaimerTitle: 'Disclaimer',
       updated: 'Last updated: 2026-07-21'
+    },
+    app: {
+      errorTitle: 'Something went wrong',
+      errorDesc: 'An unexpected error occurred. You can reload the page to try again.',
+      retry: 'Reload'
     }
   }
 }

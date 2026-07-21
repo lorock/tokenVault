@@ -32,7 +32,7 @@
 | UI 组件 | Vant 4 + @vant/icons |
 | 二维码生成 | `qrcode` |
 | 二维码解码 | `jsQR` |
-| 加密计算 | Web Crypto（`crypto.subtle`，HMAC） |
+| 加密计算 | Web Crypto（`crypto.subtle`，HMAC-TOTP + AES-GCM 保险库加密） |
 
 > 设计原则：**优先使用成熟开源组件，不重复造轮子**；二维码生成 / 解码均通过 npm 引入并在构建时打包，**运行时不依赖外部 CDN，可离线工作**。
 
@@ -40,31 +40,44 @@
 
 ```
 .
-├── index.html              # Vite 入口（挂载 #app）
+├── index.html              # Vite 入口（挂载 #app）+ CSP / 安全响应头 meta
 ├── vite.config.js          # 构建配置（base:'./' 适配子路径部署）
-├── package.json            # 依赖与脚本
+├── package.json            # 依赖与脚本（含 test / build）
 ├── package-lock.json       # 锁定依赖版本（建议提交）
+├── public/
+│   ├── sw.js               # Service Worker：应用外壳缓存优先，离线可用
+│   ├── manifest.webmanifest# PWA 清单（可安装、standalone）
+│   ├── _headers            # 部署层安全响应头（Netlify / Cloudflare Pages 适用）
+│   └── icon.svg / icon-maskable.svg
+├── test/                   # node:test 自动化测试（算法 / URI / 加密保险库）
+│   ├── helpers.js
+│   ├── totp.test.js
+│   └── vault.test.js
 └── src/
-    ├── main.js             # 应用挂载、注册 Vant、初始化主题
-    ├── App.vue             # 应用外壳（主题容器 + router-view + 页脚）
+    ├── main.js             # 安全上下文守卫 + 应用挂载 + 注册 Vant + 注册 SW
+    ├── App.vue             # 应用外壳（锁屏门禁 + 全局错误边界 + router-view + 页脚）
     ├── pages/
     │   └── HomeView.vue    # 首页：列表编排 + 搜索 / 排序 + 定时刷新 + 导入导出
     ├── components/
+    │   ├── LockScreen.vue        # 主密码设置 / 解锁（可选生物识别）门禁
     │   ├── SiteList.vue          # 列表容器
     │   ├── SiteCard.vue          # 单站点：验证码 + 倒计时进度 + 复制 / 分享 / 删除
     │   ├── SiteFormDialog.vue    # 增改表单（上传图扫码 + 粘贴 URI）
     │   ├── ShareQrDialog.vue     # 生成分享二维码
     │   └── CopyFallbackOverlay.vue # 微信复制 / 导出兜底浮层
     ├── composables/
-    │   └── useTheme.js           # 主题状态（light / dark / system，持久化）
+    │   ├── useTheme.js           # 主题状态（light / dark / system，持久化）
+    │   ├── useI18n.js            # 轻量双语（zh / en，含锁屏 / 导入等文案）
+    │   └── useVault.js           # 加密保险库单例（解锁态 / 站点 / 生物识别）
     ├── lib/
-    │   ├── totp.js               # Base32 + HMAC-TOTP + otpauth 解析 / 构建
-    │   ├── storage.js            # localStorage 持久化 + 可用性检测
+    │   ├── totp.js               # Base32 + HMAC-TOTP/HOTP + otpauth 解析 / 构建
+    │   ├── vault.js              # 本地加密保险库（AES-GCM 信封加密 + 主密码 / 生物识别）
+    │   ├── storage.js            # 字段归一化 + 可用性检测（密钥已移入 vault）
     │   ├── qr.js                 # 封装 qrcode
     │   ├── scan.js               # 封装 jsQR（文件解码，不依赖摄像头）
     │   └── clipboard.js          # 复制 + 微信兜底逻辑
     └── styles/
-        └── main.css              # 主题 CSS 变量 + 基础样式
+        └── main.css              # 主题 CSS 变量 + 基础样式 + 焦点轮廓
 ```
 
 > 旧版单体 `index.html`（原生 JS）已重命名为 `index.legacy.html` 并移出版本控制，仅作历史参考，新工程不再引用。
@@ -89,15 +102,20 @@ npm run preview
 
 ## 📦 部署
 
-构建产物为纯静态文件，可部署到任意 HTTPS 静态托管（Nginx、OSS、CloudBase、GitHub Pages 等）：
+构建产物为纯静态文件，可部署到任意 HTTPS 静态托管（Nginx、OSS、CloudBase、GitHub Pages、Netlify、Cloudflare Pages 等）：
 
 ```bash
-npm run build   # 生成 dist/
+npm install
+npm test         # 运行算法 / 加密保险库自动化测试（node --test）
+npm run build    # 生成 dist/
 # 将 dist/ 整体上传到静态托管根目录即可
 ```
 
 - `vite.config.js` 已设 `base: './'`，可部署在子路径下。
-- **必须 HTTPS**：Web Crypto（`crypto.subtle`）仅在安全上下文可用。
+- **必须 HTTPS**：Web Crypto（`crypto.subtle`）仅在安全上下文可用；应用内置安全上下文守卫，非 HTTPS 会展示提示页而非崩溃。
+- **安全响应头**：仓库 `public/_headers` 已为 Netlify / Cloudflare Pages 预设 `Content-Security-Policy`、`X-Frame-Options: DENY`、`frame-ancestors 'none'`、`Strict-Transport-Security`、`Referrer-Policy: no-referrer`、`X-Content-Type-Options: nosniff`、`Permissions-Policy`。Nginx 等请自行在配置中补齐等价头。
+- **PWA / 离线**：`public/sw.js` 缓存应用外壳（导航网络优先、回退缓存；静态资源缓存优先），无网络时仍可查看已存站点；`manifest.webmanifest` 支持「添加到主屏幕」独立运行。
+- **自动化测试与 CI**：`.github/workflows/ci.yml` 在每次推送 / PR 执行 `node --test` + `npm run build`，保证算法正确性与可构建性。
 
 ## 💬 微信公众号菜单场景
 
@@ -113,10 +131,31 @@ npm run build   # 生成 dist/
 
 ## 🔐 数据安全
 
-- 站点密钥**仅保存在当前设备的 `localStorage`**，不上传任何服务器。
-- 微信清理缓存、手动清除浏览器数据、隐私模式会导致数据丢失。
-- 建议**定期使用「导出备份」** 生成 JSON，保存到文件传输助手 / 微信笔记 / 本地文件。
-- 导入备份时仅读取本地选择的 JSON 文件。
+- 站点密钥**仅保存在当前设备的 `localStorage`**，不上传任何服务器（本地优先、隐私敏感）。
+- **加密保险库（v2.7.0+）**：首次使用需设置主密码，所有站点以 **AES-256-GCM 信封加密**存储：
+  - 随机生成数据密钥 `DEK` 加密站点数据；`DEK` 由主密码派生的密钥（`PBKDF2`，25 万次迭代）包装后落盘。
+  - **明文密钥永不以任何形式写入存储**；解锁后 `DEK` 仅驻留内存，锁屏 / 切后台即清除。
+  - 可选**生物识别解锁**（WebAuthn PRF，平台认证器如指纹 / 面容）：与主密码是两条独立解锁路径，无需依赖系统钥匙串。
+  - 支持**修改主密码**（重包装 `DEK`，站点密文不变）与**忘记密码重置**（销毁保险库，需重新录入 / 导入）。
+- 微信清理缓存、手动清除浏览器数据、隐私模式会导致数据丢失；加密仅在本地，服务端无副本可恢复。
+- 建议**定期使用「导出备份」** 生成 JSON，保存到文件传输助手 / 微信笔记 / 本地文件（备份为明文，请妥善保管）。
+- 导入备份时仅读取本地选择的 JSON 文件；导入弹窗提供**合并 / 覆盖**选择，避免误清已有数据。
+
+## 🔒 安全架构（生产就绪）
+
+| 维度 | 实现 |
+|---|---|
+| 静态加密 + 应用锁 | AES-256-GCM 信封加密 + 主密码（PBKDF2 25w）+ 可选生物识别（WebAuthn PRF） |
+| 离线可用 | Service Worker 缓存应用外壳 + PWA manifest，无网仍可查看站点 |
+| 安全上下文 | `main.js` 守卫：非 HTTPS/localhost 展示提示页，避免 Web Crypto 不可用导致崩溃 |
+| 安全响应头 | `_headers` 预设 CSP / HSTS / X-Frame-Options / Referrer-Policy 等 |
+| 全局错误边界 | `App.vue` Vue `onErrorCaptured` + `app.config.errorHandler` + 兜底 UI |
+| 可访问性 | `:focus-visible` 键盘焦点轮廓、尊重 `prefers-reduced-motion`、按钮 `aria-label`、移除缩放限制 |
+| 自动化测试 | `node --test` 覆盖 RFC 4226 向量、SHA-1/256/512、URI 往返、加密保险库 |
+| CI | GitHub Actions：推送 / PR 自动跑测试 + 构建 |
+| 性能 | Vant 按需引入、表单 / 分享弹窗 `defineAsyncComponent` 懒加载 |
+
+> 说明：本项目**本地优先、隐私敏感**，未集成远程监控 / 埋点（如 Sentry）。如需可观测性，建议在遵循隐私合规前提下自行接入。
 
 ## 🎨 主题
 
@@ -139,4 +178,4 @@ npm run build   # 生成 dist/
 
 ## 📄 许可证
 
-本项目仅供学习与自用。
+本项目以 **MIT 许可证** 开源，详见 [LICENSE](./LICENSE)。

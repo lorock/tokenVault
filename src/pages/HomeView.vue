@@ -5,17 +5,20 @@
         <span class="brand-title">{{ t('brand') }}</span>
       </template>
       <template #right>
-        <button class="nav-btn" :title="t('nav.lang')" @click="toggleLang">
+        <button class="nav-btn" :title="t('nav.lang')" :aria-label="t('nav.lang')" @click="toggleLang">
           <span class="lang-pill">{{ locale === 'zh' ? 'EN' : '中' }}</span>
         </button>
-        <button class="nav-btn icon-btn" :title="t('nav.switchTheme')" @click="onTheme">
+        <button class="nav-btn icon-btn" :title="t('nav.switchTheme')" :aria-label="t('nav.switchTheme')" @click="onTheme">
           <van-icon name="bulb-o" />
         </button>
-        <button class="nav-btn icon-btn" :title="t('nav.export')" @click="exportBackup">
+        <button class="nav-btn icon-btn" :title="t('nav.export')" :aria-label="t('nav.export')" @click="exportBackup">
           <van-icon name="upgrade" />
         </button>
-        <button class="nav-btn icon-btn" :title="t('nav.import')" @click="importBackup">
+        <button class="nav-btn icon-btn" :title="t('nav.import')" :aria-label="t('nav.import')" @click="importBackup">
           <van-icon name="down" />
+        </button>
+        <button class="nav-btn icon-btn" :title="t('nav.lock')" :aria-label="t('nav.lock')" @click="lockApp">
+          <van-icon name="lock" />
         </button>
       </template>
     </van-nav-bar>
@@ -115,37 +118,57 @@
 
     <div v-if="sortMenuOpen" class="sort-mask" @click="sortMenuOpen = false"></div>
 
-    <button class="fab-add" :title="t('nav.addSite')" @click="addSite">+</button>
+    <button class="fab-add" :title="t('nav.addSite')" :aria-label="t('nav.addSite')" @click="addSite">+</button>
 
     <SiteFormDialog v-model="formVisible" :editing="editingSite" @save="saveSite" @delete="deleteSite" />
     <ShareQrDialog v-model="shareVisible" :site="shareSiteData" />
     <CopyFallbackOverlay />
+
+    <van-popup v-model:show="importPopup" position="bottom" round :style="{ padding: '18px 16px calc(18px + env(safe-area-inset-bottom))' }">
+      <div class="import-pop">
+        <div class="import-pop-title">{{ t('import.title', { n: importCount }) }}</div>
+        <div class="import-pop-desc">{{ t('import.desc') }}</div>
+        <van-button block type="primary" class="import-pop-btn" @click="mergeImport">
+          {{ t('import.merge', { n: importCount }) }}
+        </van-button>
+        <van-button block type="danger" plain class="import-pop-btn" @click="replaceImport">
+          {{ t('import.replace') }}
+        </van-button>
+        <van-button block plain class="import-pop-btn ghost" @click="importPending = null">
+          {{ t('common.cancel') }}
+        </van-button>
+      </div>
+    </van-popup>
 
     <input ref="importInput" type="file" accept="application/json,.json" hidden @change="handleImportFile" />
   </div>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, computed } from 'vue'
+import { onMounted, onUnmounted, ref, computed, defineAsyncComponent } from 'vue'
 import { showToast, showConfirmDialog } from 'vant'
 import SiteList from '../components/SiteList.vue'
-import SiteFormDialog from '../components/SiteFormDialog.vue'
-import ShareQrDialog from '../components/ShareQrDialog.vue'
 import CopyFallbackOverlay from '../components/CopyFallbackOverlay.vue'
 import { openCopyFallback } from '../lib/clipboard'
-import { loadSites, saveSites, uid, isStorageAvailable, normalizeSite } from '../lib/storage'
+import { uid, isStorageAvailable, normalizeSite } from '../lib/storage'
+import { useVault } from '../composables/useVault'
 import { useTheme } from '../composables/useTheme'
 import { useI18n } from '../composables/useI18n'
 
+// 表单与分享弹窗含较重依赖（jsQR/qrcode），按需懒加载以减小首屏体积
+const SiteFormDialog = defineAsyncComponent(() => import('../components/SiteFormDialog.vue'))
+const ShareQrDialog = defineAsyncComponent(() => import('../components/ShareQrDialog.vue'))
+
 const themeApi = useTheme()
 const resolved = themeApi.resolved
+const vault = useVault()
 const { locale, t, setLocale } = useI18n()
 
 function toggleLang() {
   setLocale(locale.value === 'zh' ? 'en' : 'zh')
 }
 
-const sites = ref(loadSites())
+const sites = vault.sites
 const now = ref(Date.now())
 
 // 搜索 + 排序状态
@@ -231,9 +254,9 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', onVisibilityChange)
 })
 
-function persist() {
-  const ok = saveSites(sites.value)
-  if (!ok) {
+async function persist() {
+  const ok = await vault.setSites(sites.value)
+  if (ok === false) {
     showToast(t('toast.saveFailed'))
   }
 }
@@ -293,6 +316,10 @@ function onTheme() {
   showToast(t('theme.toast', { label: t('theme.' + themeApi.label()) }))
 }
 
+function lockApp() {
+  vault.lock()
+}
+
 function exportBackup() {
   if (sites.value.length === 0) return showToast(t('toast.noSiteExport'))
     const backup = {
@@ -339,6 +366,9 @@ function importBackup() {
   importInput.value && importInput.value.click()
 }
 
+// 导入合并/覆盖：暂存待导入站点，弹出选择；existCount 用于冲突提示
+const importPending = ref(null)
+
 async function handleImportFile(e) {
   const file = e.target.files && e.target.files[0]
   if (!file) return
@@ -348,25 +378,54 @@ async function handleImportFile(e) {
     if (!data.sites || !Array.isArray(data.sites)) {
       throw new Error('无效的备份文件：缺少 sites 字段')
     }
-    // 去重键 = [issuer, account, secret] 的序列化；含密钥可避免「同名不同密钥」被误判重复。
-    // 用 JSON.stringify 而非 || 拼接，防止 issuer/account 含分隔符时产生碰撞误判。
     const keyOf = (s) => JSON.stringify([s.issuer, s.account, s.secret])
-    const existingKeys = new Set(sites.value.map(keyOf))
     const normalized = data.sites
       .filter((s) => s && s.secret)
       .map((s) => normalizeSite(s))
+    const existingKeys = new Set(sites.value.map(keyOf))
     const unique = normalized.filter((s) => !existingKeys.has(keyOf(s)))
     if (unique.length === 0) {
       return showToast(t('toast.importAllExist'))
     }
-    sites.value.push(...unique)
-    persist()
-    showToast(t('toast.imported', { n: unique.length }))
+    // 已有站点时，询问合并还是覆盖，避免误清数据
+    if (sites.value.length > 0) {
+      importPending.value = unique
+    } else {
+      await applyImport(unique)
+    }
   } catch (err) {
     showToast(t('toast.importFailed', { msg: err.message }))
   }
   e.target.value = ''
 }
+
+async function applyImport(list, replace = false) {
+  if (replace) {
+    sites.value = list
+  } else {
+    sites.value.push(...list)
+  }
+  importPending.value = null
+  await persist()
+  showToast(t('toast.imported', { n: list.length }))
+}
+
+function mergeImport() {
+  if (!importPending.value) return
+  applyImport(importPending.value, false)
+}
+function replaceImport() {
+  if (!importPending.value) return
+  applyImport(importPending.value, true)
+}
+
+const importCount = computed(() => (importPending.value ? importPending.value.length : 0))
+const importPopup = computed({
+  get: () => !!importPending.value,
+  set: (v) => {
+    if (!v) importPending.value = null
+  }
+})
 
 </script>
 
@@ -700,5 +759,33 @@ async function handleImportFile(e) {
   height: 40px;
   padding: 0 24px;
   font-weight: 600;
+}
+
+/* 导入合并 / 覆盖 选择弹窗（底部弹出，键盘可达） */
+.import-pop {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.import-pop-title {
+  font-size: var(--f-title);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+}
+.import-pop-desc {
+  font-size: var(--f-body);
+  color: var(--text-2);
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+.import-pop-btn {
+  height: 44px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.import-pop-btn.ghost {
+  color: var(--text-2);
+  border-color: var(--input-border);
 }
 </style>

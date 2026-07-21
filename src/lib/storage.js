@@ -4,20 +4,6 @@ export const COLORS = [
   '#f38020', '#10b981', '#8b5cf6'
 ]
 
-const KEY = 'totp_sites_v1'
-
-export function loadSites() {
-  try {
-    const raw = localStorage.getItem(KEY)
-    if (!raw) return []
-    const arr = JSON.parse(raw)
-    if (!Array.isArray(arr)) return []
-    return arr.map(normalizeSite)
-  } catch {
-    return []
-  }
-}
-
 // 归一化单条站点：补全缺失字段（type / counter 默认值），并清洗密钥。
 // 既用于读取本地存储，也用于导入备份，保证数据结构一致。
 export function normalizeSite(s) {
@@ -37,15 +23,6 @@ export function normalizeSite(s) {
     // 创建时间戳：用于「最近添加」排序。旧备份/历史数据无此字段时回退 0（视为最旧），
     // 保证导入的老数据不会因缺字段而报错或排在异常位置。
     createdAt: Number.isFinite(s.createdAt) ? s.createdAt : 0
-  }
-}
-
-export function saveSites(sites) {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(sites))
-    return true
-  } catch {
-    return false
   }
 }
 

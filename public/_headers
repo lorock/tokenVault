@@ -1,0 +1,16 @@
+# 生产部署安全响应头（Netlify / Cloudflare Pages 识别 _headers）。
+# 本地预览（vite preview）不读取此文件；上线时由托管层下发这些头。
+# frame-ancestors 无法用 HTML meta 设置，必须在此（或服务器配置）下发以防点击劫持。
+
+/*
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Service Worker 必须允许被同域脚本获取，且禁止被跨域嵌入
+/sw.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: ./
