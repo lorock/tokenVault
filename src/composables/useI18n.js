@@ -14,7 +14,7 @@ const locale = ref(initialLocale)
 
 const messages = {
   zh: {
-    brand: 'TOTP 验证器',
+    brand: '令牌盒',
     common: {
       copy: '复制',
       delete: '删除',
@@ -70,6 +70,8 @@ const messages = {
       unnamed: '未命名站点',
       secondsLeft: '{n}s 后刷新',
       copiedCode: '已复制验证码',
+      counter: '计数器 C{n}',
+      next: '下一码',
       confirmDeleteMsg: '确定删除「{name}」？'
     },
     form: {
@@ -86,6 +88,10 @@ const messages = {
       secretPh: 'Base32 密钥',
       random: '随机',
       security: '安全选项',
+      type: '类型',
+      typeTotp: '时间型 (TOTP)',
+      typeHotp: '计数器型 (HOTP)',
+      counter: '初始计数器',
       algo: '哈希算法',
       digits: '验证码位数',
       period: '刷新步长',
@@ -94,8 +100,8 @@ const messages = {
       uploadQr: '上传二维码图片',
       uploadQrSub: '支持相册截图 / 电脑本地图片',
       pasteUri: '粘贴 otpauth URI',
-      pasteUriSub: '含 otpauth://totp/... 的完整链接',
-      pastePh: '粘贴 otpauth://totp/... 开头的完整 URI',
+      pasteUriSub: '含 otpauth://totp/... 或 otpauth://hotp/... 的完整链接',
+      pastePh: '粘贴 otpauth://totp/... 或 otpauth://hotp/... 开头的完整 URI',
       parseUri: '解析 URI',
       deleteBtn: '删除站点',
       saveBtn: '保存',
@@ -106,7 +112,6 @@ const messages = {
       enterIssuer: '请输入站点名称',
       enterSecret: '请输入密钥或扫描二维码',
       invalidSecret: '密钥格式无效（需 Base32）',
-      hotpUnsupported: '暂仅支持 TOTP 类型，HOTP 无法正确计算',
       digits6: '6 位',
       digits8: '8 位',
       period30: '30 秒',
@@ -126,7 +131,7 @@ const messages = {
     footer: {
       privacy: '隐私政策',
       disclaimer: '免责声明',
-      copyright: '© 2026 TOTP 验证器 · 保留所有权利',
+      copyright: '© 2026 令牌盒 · 保留所有权利',
       note: '本工具为开源前端应用，所有数据仅存储于您的本地设备',
       langLabel: '语言'
     },
@@ -137,7 +142,7 @@ const messages = {
     }
   },
   en: {
-    brand: 'TOTP Authenticator',
+    brand: 'TokenVault',
     common: {
       copy: 'Copy',
       delete: 'Delete',
@@ -193,6 +198,8 @@ const messages = {
       unnamed: 'Unnamed site',
       secondsLeft: 'Refreshes in {n}s',
       copiedCode: 'Code copied',
+      counter: 'Counter C{n}',
+      next: 'Next code',
       confirmDeleteMsg: 'Delete "{name}"?'
     },
     form: {
@@ -209,6 +216,10 @@ const messages = {
       secretPh: 'Base32 secret',
       random: 'Random',
       security: 'Security Options',
+      type: 'Type',
+      typeTotp: 'Time-based (TOTP)',
+      typeHotp: 'Counter-based (HOTP)',
+      counter: 'Initial counter',
       algo: 'Hash algorithm',
       digits: 'Code digits',
       period: 'Refresh interval',
@@ -217,8 +228,8 @@ const messages = {
       uploadQr: 'Upload QR image',
       uploadQrSub: 'Album screenshot / local image',
       pasteUri: 'Paste otpauth URI',
-      pasteUriSub: 'Full link starting with otpauth://totp/...',
-      pastePh: 'Paste the full URI starting with otpauth://totp/...',
+      pasteUriSub: 'Full link starting with otpauth://totp/... or otpauth://hotp/...',
+      pastePh: 'Paste the full URI starting with otpauth://totp/... or otpauth://hotp/...',
       parseUri: 'Parse URI',
       deleteBtn: 'Delete Site',
       saveBtn: 'Save',
@@ -229,7 +240,6 @@ const messages = {
       enterIssuer: 'Please enter a site name',
       enterSecret: 'Please enter a secret or scan a QR code',
       invalidSecret: 'Invalid secret format (Base32 required)',
-      hotpUnsupported: 'Only TOTP is supported; HOTP cannot be computed correctly',
       digits6: '6 digits',
       digits8: '8 digits',
       period30: '30s',
@@ -249,7 +259,7 @@ const messages = {
     footer: {
       privacy: 'Privacy Policy',
       disclaimer: 'Disclaimer',
-      copyright: '© 2026 TOTP Authenticator · All Rights Reserved',
+      copyright: '© 2026 TokenVault · All Rights Reserved',
       note: 'This tool is an open-source front-end app. All data is stored only on your local device.',
       langLabel: 'Language'
     },

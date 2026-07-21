@@ -44,6 +44,17 @@
           {{ t('form.security') }}
         </div>
         <div class="opt-row">
+          <label>{{ t('form.type') }}</label>
+          <van-radio-group v-model="type" direction="horizontal">
+            <van-radio name="totp">{{ t('form.typeTotp') }}</van-radio>
+            <van-radio name="hotp">{{ t('form.typeHotp') }}</van-radio>
+          </van-radio-group>
+        </div>
+        <div v-if="type === 'hotp'" class="opt-row">
+          <label>{{ t('form.counter') }}</label>
+          <van-stepper v-model="counter" min="0" :integer="true" />
+        </div>
+        <div class="opt-row">
           <label>{{ t('form.algo') }}</label>
           <van-radio-group v-model="algo" direction="horizontal">
             <van-radio name="SHA-1">SHA-1</van-radio>
@@ -163,6 +174,8 @@ const algo = ref('SHA-1')
 const digits = ref('6')
 const period = ref('30')
 const color = ref(COLORS[0])
+const type = ref('totp')
+const counter = ref(0)
 const showPaste = ref(false)
 const pasteUri = ref('')
 const fileInput = ref(null)
@@ -176,6 +189,8 @@ function open() {
     digits.value = String(props.editing.digits || 6)
     period.value = String(props.editing.period || 30)
     color.value = props.editing.color || COLORS[0]
+    type.value = props.editing.type === 'hotp' ? 'hotp' : 'totp'
+    counter.value = props.editing.counter || 0
   } else {
     issuer.value = ''
     account.value = ''
@@ -184,6 +199,8 @@ function open() {
     digits.value = '6'
     period.value = '30'
     color.value = COLORS[0]
+    type.value = 'totp'
+    counter.value = 0
   }
   showPaste.value = false
   pasteUri.value = ''
@@ -213,11 +230,7 @@ async function onFile(e) {
   try {
     const data = await decodeQrFromFile(file)
     if (!data) return showToast(t('form.noQr'))
-    const parsed = parseOtpAuthUri(data)
-    if (parsed.type === 'hotp') {
-      return showToast(t('form.hotpUnsupported'))
-    }
-    fillFromParsed(parsed)
+    fillFromParsed(parseOtpAuthUri(data))
     showToast(t('form.recognized'))
   } catch (err) {
     showToast(t('form.recogFailed', { msg: err.message }))
@@ -229,11 +242,7 @@ function parsePaste() {
   const uri = pasteUri.value.trim()
   if (!uri) return showToast(t('form.enterUri'))
   try {
-    const parsed = parseOtpAuthUri(uri)
-    if (parsed.type === 'hotp') {
-      return showToast(t('form.hotpUnsupported'))
-    }
-    fillFromParsed(parsed)
+    fillFromParsed(parseOtpAuthUri(uri))
     showPaste.value = false
   } catch (e) {
     showToast(e.message)
@@ -247,6 +256,8 @@ function fillFromParsed(p) {
   algo.value = p.algo
   digits.value = String(p.digits)
   period.value = String(p.period)
+  type.value = p.type === 'hotp' ? 'hotp' : 'totp'
+  counter.value = p.counter || 0
   secretError.value = ''
 }
 
@@ -268,6 +279,8 @@ function onSave() {
     algo: algo.value,
     digits: parseInt(digits.value, 10),
     period: parseInt(period.value, 10),
+    type: type.value,
+    counter: type.value === 'hotp' ? parseInt(counter.value, 10) || 0 : 0,
     color: color.value
   })
   visible.value = false

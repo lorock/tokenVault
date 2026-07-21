@@ -45,6 +45,7 @@
       @edit="editSite"
       @share="shareSite"
       @delete="deleteSite"
+      @advance="advanceCounter"
     />
 
     <button class="fab-add" :title="t('nav.addSite')" @click="addSite">+</button>
@@ -64,7 +65,7 @@ import SiteList from '../components/SiteList.vue'
 import SiteFormDialog from '../components/SiteFormDialog.vue'
 import ShareQrDialog from '../components/ShareQrDialog.vue'
 import CopyFallbackOverlay from '../components/CopyFallbackOverlay.vue'
-import { loadSites, saveSites, uid, isStorageAvailable } from '../lib/storage'
+import { loadSites, saveSites, uid, isStorageAvailable, normalizeSite } from '../lib/storage'
 import { useTheme } from '../composables/useTheme'
 import { useI18n } from '../composables/useI18n'
 
@@ -151,6 +152,14 @@ function shareSite(site) {
   shareVisible.value = true
 }
 
+// HOTP：使用一次验证码后推进计数器，保证下次生成不同口令
+function advanceCounter(id) {
+  const s = sites.value.find((x) => x.id === id)
+  if (!s) return
+  s.counter = (s.counter || 0) + 1
+  persist()
+}
+
 function onTheme() {
   themeApi.cycle()
   showToast(t('theme.toast', { label: t('theme.' + themeApi.label()) }))
@@ -158,20 +167,22 @@ function onTheme() {
 
 function exportBackup() {
   if (sites.value.length === 0) return showToast(t('toast.noSiteExport'))
-  const backup = {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    siteCount: sites.value.length,
-    sites: sites.value.map((s) => ({
-      issuer: s.issuer,
-      account: s.account,
-      secret: s.secret,
-      algo: s.algo,
-      digits: s.digits,
-      period: s.period,
-      color: s.color
-    }))
-  }
+    const backup = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      siteCount: sites.value.length,
+      sites: sites.value.map((s) => ({
+        issuer: s.issuer,
+        account: s.account,
+        secret: s.secret,
+        algo: s.algo,
+        digits: s.digits,
+        period: s.period,
+        type: s.type,
+        counter: s.counter,
+        color: s.color
+      }))
+    }
   const json = JSON.stringify(backup, null, 2)
   const isWeChat = /micromessenger/i.test(navigator.userAgent)
   if (isWeChat) {
@@ -213,16 +224,7 @@ async function handleImportFile(e) {
     )
     const normalized = data.sites
       .filter((s) => s && s.secret)
-      .map((s) => ({
-        id: uid(),
-        issuer: s.issuer || '',
-        account: s.account || '',
-        secret: String(s.secret).trim().toUpperCase(),
-        algo: s.algo || 'SHA-1',
-        digits: s.digits || 6,
-        period: s.period || 30,
-        color: s.color || '#4f8cff'
-      }))
+      .map((s) => normalizeSite(s))
     const unique = normalized.filter(
       (s) => !existingKeys.has(`${s.issuer}||${s.account}||${s.secret}`)
     )

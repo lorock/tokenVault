@@ -1,4 +1,4 @@
-// TOTP 核心：Base32 编解码、HMAC-TOTP 计算、otpauth URI 解析/构建
+// TOTP/HOTP 核心：Base32 编解码、HMAC 计算、otpauth URI 解析/构建
 // 算法遵循 RFC 4226 (HOTP) / RFC 6238 (TOTP)，Web Crypto 提供 HMAC。
 
 const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
@@ -48,15 +48,12 @@ async function hmac(algoName, keyBytes, data) {
 
 const ALGO_MAP = { 'SHA-1': 'SHA-1', 'SHA-256': 'SHA-256', 'SHA-512': 'SHA-512' }
 
-// 计算某时间戳下的 TOTP。返回 { code, remaining, counter }
-export async function totp(secretBase32, opts = {}) {
+// HOTP (RFC 4226)：以计数器为输入生成动态口令
+export async function hotp(secretBase32, opts = {}) {
   const algo = (opts.algorithm || 'SHA-1').toUpperCase()
   const algoName = ALGO_MAP[algo] || 'SHA-1'
   const digits = opts.digits || 6
-  const period = opts.period || 30
-  const ts = opts.timestamp != null ? opts.timestamp : Date.now()
-
-  const counter = Math.floor(ts / 1000 / period)
+  const counter = opts.counter || 0
   const keyBytes = base32Decode(secretBase32)
 
   const buf = new ArrayBuffer(8)
@@ -72,8 +69,20 @@ export async function totp(secretBase32, opts = {}) {
     ((mac[offset + 2] & 0xff) << 8) |
     (mac[offset + 3] & 0xff)
   const code = (codeInt % Math.pow(10, digits)).toString().padStart(digits, '0')
-  const remaining = period - (Math.floor(ts / 1000) % period)
+  return { code, counter }
+}
 
+// TOTP (RFC 6238)：HOTP 的时间变形，计数器 = floor(时间 / 步长)
+export async function totp(secretBase32, opts = {}) {
+  const period = opts.period || 30
+  const ts = opts.timestamp != null ? opts.timestamp : Date.now()
+  const counter = Math.floor(ts / 1000 / period)
+  const { code } = await hotp(secretBase32, {
+    algorithm: opts.algorithm,
+    digits: opts.digits,
+    counter
+  })
+  const remaining = period - (Math.floor(ts / 1000) % period)
   return { code, remaining, counter }
 }
 
@@ -100,6 +109,7 @@ export function parseOtpAuthUri(uri) {
   const algo = (params.get('algorithm') || 'SHA-1').toUpperCase()
   const digits = parseInt(params.get('digits') || '6', 10)
   const period = parseInt(params.get('period') || '30', 10)
+  const counter = parseInt(params.get('counter') || '0', 10)
 
   return {
     type,
@@ -108,17 +118,23 @@ export function parseOtpAuthUri(uri) {
     secret,
     algo,
     digits,
-    period
+    period: isNaN(period) ? 30 : period,
+    counter: isNaN(counter) ? 0 : counter
   }
 }
 
 export function buildOtpAuthUri(s) {
+  const type = s.type === 'hotp' ? 'hotp' : 'totp'
   const label = (s.issuer ? s.issuer + ':' : '') + (s.account || '')
-  const u = new URL('otpauth://totp/' + encodeURIComponent(label))
+  const u = new URL(`otpauth://${type}/` + encodeURIComponent(label))
   u.searchParams.set('secret', s.secret)
   if (s.issuer) u.searchParams.set('issuer', s.issuer)
   if (s.algo && s.algo !== 'SHA-1') u.searchParams.set('algorithm', s.algo)
   if (s.digits && s.digits !== 6) u.searchParams.set('digits', String(s.digits))
-  if (s.period && s.period !== 30) u.searchParams.set('period', String(s.period))
+  if (type === 'hotp') {
+    u.searchParams.set('counter', String(s.counter || 0))
+  } else if (s.period && s.period !== 30) {
+    u.searchParams.set('period', String(s.period))
+  }
   return u.toString()
 }

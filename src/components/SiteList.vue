@@ -8,6 +8,7 @@
       @edit="$emit('edit', $event)"
       @share="$emit('share', $event)"
       @delete="$emit('delete', $event)"
+      @advance="$emit('advance', $event)"
     />
   </div>
 </template>
@@ -19,7 +20,7 @@ defineProps({
   sites: { type: Array, required: true },
   now: { type: Number, required: true }
 })
-defineEmits(['edit', 'share', 'delete'])
+defineEmits(['edit', 'share', 'delete', 'advance'])
 </script>
 
 <style scoped>

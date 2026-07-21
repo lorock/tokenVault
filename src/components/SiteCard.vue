@@ -5,7 +5,10 @@
         {{ initial }}
       </div>
       <div class="sc-meta">
-        <div class="sc-issuer">{{ site.issuer || t('site.unnamed') }}</div>
+        <div class="sc-issuer">
+          {{ site.issuer || t('site.unnamed') }}
+          <span v-if="isHotp" class="sc-type">HOTP</span>
+        </div>
         <div class="sc-account">{{ site.account }}</div>
       </div>
       <van-button size="mini" plain @click="$emit('edit', site)">{{ t('common.edit') }}</van-button>
@@ -15,12 +18,19 @@
       {{ code || '······' }}
     </div>
 
-    <div class="sc-progress">
+    <!-- TOTP：时间进度条；HOTP：计数器 + 下一码 -->
+    <div v-if="!isHotp" class="sc-progress">
       <div class="sc-bar" :class="barState" :style="{ width: progress + '%' }"></div>
+    </div>
+    <div v-else class="sc-hotp">
+      <span class="sc-counter">{{ t('site.counter', { n: counterVal }) }}</span>
+      <van-button size="mini" plain class="sc-next" @click="advance">
+        <van-icon name="replay" /> {{ t('site.next') }}
+      </van-button>
     </div>
 
     <div class="sc-actions">
-      <span class="sc-remaining" :class="barState">{{ t('site.secondsLeft', { n: remaining }) }}</span>
+      <span v-if="!isHotp" class="sc-remaining" :class="barState">{{ t('site.secondsLeft', { n: remaining }) }}</span>
       <div class="sc-btns">
         <van-button size="mini" plain @click="copyCode">{{ t('common.copy') }}</van-button>
         <van-button size="mini" plain @click="$emit('share', site)">{{ t('common.share') }}</van-button>
@@ -33,7 +43,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { showToast, showConfirmDialog } from 'vant'
-import { totp } from '../lib/totp'
+import { totp, hotp } from '../lib/totp'
 import { copyText } from '../lib/clipboard'
 import { useI18n } from '../composables/useI18n'
 
@@ -41,10 +51,12 @@ const props = defineProps({
   site: { type: Object, required: true },
   now: { type: Number, required: true }
 })
-const emit = defineEmits(['edit', 'share', 'delete'])
+const emit = defineEmits(['edit', 'share', 'delete', 'advance'])
 const { t } = useI18n()
 
 const code = ref('')
+const isHotp = computed(() => props.site.type === 'hotp')
+const counterVal = computed(() => props.site.counter || 0)
 const period = computed(() => props.site.period || 30)
 const counter = computed(() => Math.floor(props.now / 1000 / period.value))
 const remaining = computed(() => period.value - (Math.floor(props.now / 1000) % period.value))
@@ -59,21 +71,37 @@ const initial = computed(() => (props.site.issuer || props.site.account || '?').
 
 async function computeCode() {
   try {
-    const r = await totp(props.site.secret, {
-      algorithm: props.site.algo,
-      digits: props.site.digits,
-      period: props.site.period
-    })
+    let r
+    if (isHotp.value) {
+      r = await hotp(props.site.secret, {
+        algorithm: props.site.algo,
+        digits: props.site.digits,
+        counter: counterVal.value
+      })
+    } else {
+      r = await totp(props.site.secret, {
+        algorithm: props.site.algo,
+        digits: props.site.digits,
+        period: props.site.period
+      })
+    }
     code.value = r.code
   } catch {
     code.value = 'ERROR'
   }
 }
 
-// 周期边界（counter）变化需重算；编辑密钥/算法/位数/周期时也要即时重算，
-// 否则改了密钥但周期没变会显示陈旧的验证码
+// TOTP 需监听周期边界重算；HOTP 需监听计数器变化；
+// 编辑密钥/算法/位数/周期时也要即时重算，否则会显示陈旧验证码。
 watch(
-  [counter, () => props.site.secret, () => props.site.algo, () => props.site.digits, () => props.site.period],
+  [
+    counter,
+    () => props.site.secret,
+    () => props.site.algo,
+    () => props.site.digits,
+    () => props.site.period,
+    () => props.site.counter
+  ],
   computeCode,
   { immediate: true }
 )
@@ -81,6 +109,10 @@ watch(
 async function copyCode() {
   const ok = await copyText(code.value)
   if (ok) showToast(t('site.copiedCode'))
+}
+
+function advance() {
+  emit('advance', props.site.id)
 }
 
 async function onDelete() {
@@ -141,6 +173,20 @@ async function onDelete() {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sc-type {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding: 1px 6px;
+  line-height: 1.6;
 }
 .sc-account {
   font-size: 12px;
@@ -180,6 +226,21 @@ async function onDelete() {
 }
 .sc-bar.danger {
   background: linear-gradient(90deg, #f87171, var(--danger));
+}
+.sc-hotp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 5px;
+  margin-bottom: 0;
+  min-height: 28px;
+}
+.sc-counter {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
 }
 .sc-actions {
   display: flex;

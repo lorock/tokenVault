@@ -4,7 +4,7 @@ import PrivacyPolicy from '../pages/PrivacyPolicy.vue'
 import Disclaimer from '../pages/Disclaimer.vue'
 
 const routes = [
-  { path: '/', name: 'home', component: HomeView, meta: { title: 'TOTP 验证器' } },
+  { path: '/', name: 'home', component: HomeView, meta: { title: '令牌盒' } },
   { path: '/privacy', name: 'privacy', component: PrivacyPolicy, meta: { title: '隐私政策' } },
   { path: '/disclaimer', name: 'disclaimer', component: Disclaimer, meta: { title: '免责声明' } },
   { path: '/:pathMatch(.*)*', redirect: '/' }
