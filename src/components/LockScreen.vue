@@ -138,8 +138,17 @@ async function doSetup() {
   }
   try {
     await vault.setup(pw.value)
+    // 勾选了生物识别则在解锁状态下登记（DEK 已在内存，enrollBio 内部包装同一 DEK）
+    if (enableBio.value) {
+      try {
+        await vault.enrollBio()
+      } catch {
+        // 生物识别登记失败不阻断主密码设置，仍可用密码解锁
+      }
+    }
     pw.value = ''
     pw2.value = ''
+    enableBio.value = false
   } catch {
     // 错误文案由 errText 映射
   }
