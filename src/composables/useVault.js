@@ -150,6 +150,7 @@ export function useVault() {
     lock()
     pendingLegacy.value = null
     hasLegacy.value = false
+    refreshBioFlags()
   }
 
   return {

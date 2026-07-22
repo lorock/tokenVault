@@ -254,7 +254,7 @@ import { showToast, showConfirmDialog } from 'vant'
 import SiteList from '../components/SiteList.vue'
 import CopyFallbackOverlay from '../components/CopyFallbackOverlay.vue'
 import { openCopyFallback } from '../lib/clipboard'
-import { uid, isStorageAvailable, normalizeSite } from '../lib/storage'
+import { uid, isStorageAvailable, normalizeSite, resolveImport } from '../lib/storage'
 import { useVault } from '../composables/useVault'
 import { useTheme } from '../composables/useTheme'
 import { useI18n } from '../composables/useI18n'
@@ -470,8 +470,11 @@ function importBackup() {
   importInput.value && importInput.value.click()
 }
 
-// 导入合并/覆盖：暂存待导入站点，弹出选择；existCount 用于冲突提示
+// 导入合并/覆盖：暂存待导入站点，弹出选择
+// importPending = 文件中的「新增」站点（用于合并追加与计数）；
+// importFull = 文件全部归一化站点（用于「覆盖全部」时还原成文件完整内容）
 const importPending = ref(null)
+const importFull = ref(null)
 
 async function handleImportFile(e) {
   const file = e.target.files && e.target.files[0]
@@ -482,20 +485,19 @@ async function handleImportFile(e) {
     if (!data.sites || !Array.isArray(data.sites)) {
       throw new Error('无效的备份文件：缺少 sites 字段')
     }
-    const keyOf = (s) => JSON.stringify([s.issuer, s.account, s.secret])
     const normalized = data.sites
       .filter((s) => s && s.secret)
       .map((s) => normalizeSite(s))
-    const existingKeys = new Set(sites.value.map(keyOf))
-    const unique = normalized.filter((s) => !existingKeys.has(keyOf(s)))
+    const { full, unique } = resolveImport(sites.value, normalized)
     if (unique.length === 0) {
       return showToast(t('toast.importAllExist'))
     }
+    importFull.value = full
     // 已有站点时，询问合并还是覆盖，避免误清数据
     if (sites.value.length > 0) {
       importPending.value = unique
     } else {
-      await applyImport(unique)
+      await applyImport(full)
     }
   } catch (err) {
     showToast(t('toast.importFailed', { msg: err.message }))
@@ -510,6 +512,7 @@ async function applyImport(list, replace = false) {
     sites.value.push(...list)
   }
   importPending.value = null
+  importFull.value = null
   await persist()
   showToast(t('toast.imported', { n: list.length }))
 }
@@ -519,8 +522,9 @@ function mergeImport() {
   applyImport(importPending.value, false)
 }
 function replaceImport() {
-  if (!importPending.value) return
-  applyImport(importPending.value, true)
+  if (!importFull.value) return
+  // 覆盖全部：用文件完整内容替换当前保险库（符合「清空现有数据」的文案语义）
+  applyImport(importFull.value, true)
 }
 
 const importCount = computed(() => (importPending.value ? importPending.value.length : 0))

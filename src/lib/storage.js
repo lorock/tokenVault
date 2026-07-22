@@ -41,3 +41,16 @@ export function isStorageAvailable() {
     return false
   }
 }
+
+// 计算导入结果，供「合并 / 覆盖」决策使用。
+// - full：入文件的完整归一化列表（覆盖全部时作为保险库新内容）
+// - unique：文件中不存在于现有列表的站点（合并时追加）
+// 注意：full 用于「覆盖全部」，必须返回文件完整内容而非仅 unique，
+// 否则覆盖会变成「只保留文件里的新站点」，与「清空现有数据」的文案语义冲突。
+export function resolveImport(existing, incoming) {
+  const keyOf = (s) => JSON.stringify([s.issuer, s.account, s.secret])
+  const existingKeys = new Set(existing.map(keyOf))
+  const full = incoming
+  const unique = incoming.filter((s) => !existingKeys.has(keyOf(s)))
+  return { full, unique }
+}
