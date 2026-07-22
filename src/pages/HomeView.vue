@@ -205,9 +205,37 @@
         <div class="set-section set-section-danger">
           <div class="set-section-title">{{ t('settings.resetTitle') }}</div>
           <div class="set-hint">{{ t('settings.resetHint') }}</div>
-          <button class="set-btn danger" :disabled="settingsBusy" @click="confirmReset">
-            {{ t('settings.resetBtn') }}
-          </button>
+          <div class="set-row-between">
+            <button class="set-btn ghost" :disabled="settingsBusy" @click="exportBackup">
+              {{ t('settings.resetExport') }}
+            </button>
+            <button class="set-btn danger" :disabled="settingsBusy" @click="startReset">
+              {{ t('settings.resetBtn') }}
+            </button>
+          </div>
+
+          <template v-if="resetStep === 'confirm'">
+            <div class="set-divider"></div>
+            <div class="set-hint warn">{{ t('settings.resetPwHint') }}</div>
+            <input
+              v-model="resetPw"
+              class="set-input"
+              type="password"
+              autocomplete="current-password"
+              :placeholder="t('settings.resetPwPh')"
+              :aria-label="t('settings.resetPwPh')"
+              @keyup.enter="confirmReset"
+            />
+            <div v-if="resetError" class="set-error">{{ resetError }}</div>
+            <div class="set-row-between">
+              <button class="set-btn ghost" :disabled="settingsBusy" @click="cancelReset">
+                {{ t('settings.resetCancel') }}
+              </button>
+              <button class="set-btn danger" :disabled="settingsBusy || !resetPw" @click="confirmReset">
+                {{ t('settings.resetConfirm') }}
+              </button>
+            </div>
+          </template>
         </div>
       </div>
     </van-popup>
@@ -506,12 +534,18 @@ const settingsError = ref('')
 const pwOld = ref('')
 const pwNew = ref('')
 const pwNew2 = ref('')
+const resetStep = ref('idle')
+const resetPw = ref('')
+const resetError = ref('')
 
 function openSettings() {
   settingsError.value = ''
   pwOld.value = ''
   pwNew.value = ''
   pwNew2.value = ''
+  resetStep.value = 'idle'
+  resetPw.value = ''
+  resetError.value = ''
   settingsPopup.value = true
 }
 
@@ -564,26 +598,36 @@ async function disableBio() {
 }
 
 async function confirmReset() {
-  try {
-    await showConfirmDialog({
-      title: t('settings.resetConfirmTitle'),
-      message: t('settings.resetConfirmMsg'),
-      confirmButtonText: t('settings.resetConfirm'),
-      cancelButtonText: t('settings.resetCancel'),
-      confirmButtonColor: 'var(--danger, #e54d42)'
-    })
-  } catch {
-    return // 用户取消
-  }
+  resetError.value = ''
+  if (!resetPw.value) return
   settingsBusy.value = true
   try {
+    const ok = await vault.verifyPassword(resetPw.value)
+    if (!ok) {
+      resetError.value = t('settings.resetPwWrong')
+      return
+    }
     vault.reset()
+    resetStep.value = 'idle'
+    resetPw.value = ''
     settingsPopup.value = false
     showToast(t('settings.resetDone'))
     // reset() 已调用 lock()，App.vue 会自动回到锁屏（显示设置主密码）
   } finally {
     settingsBusy.value = false
   }
+}
+
+function startReset() {
+  resetError.value = ''
+  resetPw.value = ''
+  resetStep.value = 'confirm'
+}
+
+function cancelReset() {
+  resetStep.value = 'idle'
+  resetPw.value = ''
+  resetError.value = ''
 }
 
 </script>
@@ -1002,6 +1046,16 @@ async function confirmReset() {
   color: var(--text-2);
   line-height: 1.6;
 }
+.set-hint.warn {
+  color: var(--danger, #e53e3e);
+  font-weight: 600;
+  margin-top: 2px;
+}
+.set-divider {
+  height: 1px;
+  background: var(--card-border);
+  margin: 4px 0 2px;
+}
 .set-row-between {
   display: flex;
   align-items: center;
@@ -1043,5 +1097,10 @@ async function confirmReset() {
   background: transparent;
   color: var(--danger, #e53e3e);
   border-color: var(--danger, #e53e3e);
+}
+.set-btn.ghost {
+  background: transparent;
+  color: var(--text-2);
+  border-color: var(--input-border);
 }
 </style>

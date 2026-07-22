@@ -127,7 +127,11 @@ const messages = {
       resetConfirmMsg: '所有站点与本地加密数据将被永久删除，且无法恢复。',
       resetConfirm: '清空',
       resetCancel: '取消',
-      resetDone: '保险库已清空'
+      resetDone: '保险库已清空',
+      resetExport: '导出备份',
+      resetPwHint: '请输入主密码以确认清空操作：',
+      resetPwPh: '主密码',
+      resetPwWrong: '主密码错误'
     },
     wechat: {
       downloadHint: '微信内不支持直接下载文件。请长按下方 JSON 文本复制，保存到「文件传输助手」或微信笔记中备份。',
@@ -332,7 +336,11 @@ const messages = {
       resetConfirmMsg: 'All sites and local encrypted data will be permanently deleted and cannot be recovered.',
       resetConfirm: 'Clear',
       resetCancel: 'Cancel',
-      resetDone: 'Vault cleared'
+      resetDone: 'Vault cleared',
+      resetExport: 'Export backup',
+      resetPwHint: 'Enter your master password to confirm clearing:',
+      resetPwPh: 'Master password',
+      resetPwWrong: 'Incorrect master password'
     },
     wechat: {
       downloadHint: 'Direct file download is not supported in WeChat. Long-press the JSON text below to copy, then save it to "File Transfer" or WeChat Notes as a backup.',

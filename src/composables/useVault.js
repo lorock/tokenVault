@@ -136,6 +136,15 @@ export function useVault() {
     refreshBioFlags()
   }
 
+  async function verifyPassword(password) {
+    try {
+      await unlockWithPassword(password)
+      return true
+    } catch {
+      return false
+    }
+  }
+
   function reset() {
     clearVault()
     lock()
@@ -161,6 +170,7 @@ export function useVault() {
     changePw,
     enrollBio,
     removeBio,
+    verifyPassword,
     reset,
     isVaultSet
   }

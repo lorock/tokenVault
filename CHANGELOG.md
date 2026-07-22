@@ -2,6 +2,13 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.7.6] - 2026-07-22
+
+### 优化
+- **重置保险库增强为强约束**：点击「重置 / 清空保险库」后，先在设置面板内展开主密码输入框，调用 `vault.verifyPassword()` 校验通过才允许清空；密码错误提示「主密码错误」，杜绝误触与未授权清空。
+- **清空前「导出备份」快捷入口**：危险操作区新增「导出备份」按钮，清空前可一键备份，避免数据丢失。
+- 新增 `settings.resetExport / resetPwHint / resetPwPh / resetPwWrong` 中英文文案，及 `.set-btn.ghost` / `.set-divider` / `.set-hint.warn` 样式。
+
 ## [2.7.5] - 2026-07-22
 
 ### 新增
