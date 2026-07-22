@@ -17,6 +17,9 @@
         <button class="nav-btn icon-btn" :title="t('nav.import')" :aria-label="t('nav.import')" @click="importBackup">
           <van-icon name="down" />
         </button>
+        <button class="nav-btn icon-btn" :title="t('nav.settings')" :aria-label="t('nav.settings')" @click="openSettings">
+          <van-icon name="setting-o" />
+        </button>
         <button class="nav-btn icon-btn" :title="t('nav.lock')" :aria-label="t('nav.lock')" @click="lockApp">
           <van-icon name="lock" />
         </button>
@@ -137,6 +140,67 @@
         <van-button block plain class="import-pop-btn ghost" @click="importPending = null">
           {{ t('common.cancel') }}
         </van-button>
+      </div>
+    </van-popup>
+
+    <van-popup v-model:show="settingsPopup" position="bottom" round :style="{ padding: '18px 16px calc(18px + env(safe-area-inset-bottom))' }">
+      <div class="set-pop">
+        <div class="set-title">{{ t('settings.title') }}</div>
+
+        <div class="set-section">
+          <div class="set-section-title">{{ t('settings.bioTitle') }}</div>
+          <template v-if="!vault.bioAvailable.value">
+            <div class="set-hint">{{ t('settings.bioUnsupported') }}</div>
+          </template>
+          <template v-else-if="!vault.bioEnrolled.value">
+            <button class="set-btn primary" :disabled="settingsBusy" @click="enableBio">
+              {{ t('settings.bioEnable') }}
+            </button>
+          </template>
+          <template v-else>
+            <div class="set-row-between">
+              <span class="set-ok">{{ t('settings.bioEnabled') }}</span>
+              <button class="set-btn danger" :disabled="settingsBusy" @click="disableBio">
+                {{ t('settings.bioDisable') }}
+              </button>
+            </div>
+          </template>
+        </div>
+
+        <div class="set-section">
+          <div class="set-section-title">{{ t('settings.pwTitle') }}</div>
+          <input
+            v-model="pwOld"
+            class="set-input"
+            type="password"
+            autocomplete="current-password"
+            :placeholder="t('settings.pwCurrent')"
+            :aria-label="t('settings.pwCurrent')"
+            @keyup.enter="savePassword"
+          />
+          <input
+            v-model="pwNew"
+            class="set-input"
+            type="password"
+            autocomplete="new-password"
+            :placeholder="t('settings.pwNew')"
+            :aria-label="t('settings.pwNew')"
+            @keyup.enter="savePassword"
+          />
+          <input
+            v-model="pwNew2"
+            class="set-input"
+            type="password"
+            autocomplete="new-password"
+            :placeholder="t('settings.pwConfirm')"
+            :aria-label="t('settings.pwConfirm')"
+            @keyup.enter="savePassword"
+          />
+          <div v-if="settingsError" class="set-error">{{ settingsError }}</div>
+          <button class="set-btn primary" :disabled="settingsBusy" @click="savePassword">
+            {{ t('settings.pwSave') }}
+          </button>
+        </div>
       </div>
     </van-popup>
 
@@ -426,6 +490,70 @@ const importPopup = computed({
     if (!v) importPending.value = null
   }
 })
+
+// 安全设置面板：修改主密码 + 管理生物识别（需已解锁，DEK 已在内存）
+const settingsPopup = ref(false)
+const settingsBusy = ref(false)
+const settingsError = ref('')
+const pwOld = ref('')
+const pwNew = ref('')
+const pwNew2 = ref('')
+
+function openSettings() {
+  settingsError.value = ''
+  pwOld.value = ''
+  pwNew.value = ''
+  pwNew2.value = ''
+  settingsPopup.value = true
+}
+
+async function savePassword() {
+  settingsError.value = ''
+  if (pwNew.value.length < 4) {
+    settingsError.value = t('settings.pwTooShort')
+    return
+  }
+  if (pwNew.value !== pwNew2.value) {
+    settingsError.value = t('settings.pwMismatch')
+    return
+  }
+  settingsBusy.value = true
+  try {
+    await vault.changePw(pwOld.value, pwNew.value)
+    pwOld.value = ''
+    pwNew.value = ''
+    pwNew2.value = ''
+    settingsPopup.value = false
+    showToast(t('settings.pwChanged'))
+  } catch {
+    settingsError.value = t('settings.pwWrong')
+  } finally {
+    settingsBusy.value = false
+  }
+}
+
+async function enableBio() {
+  settingsError.value = ''
+  settingsBusy.value = true
+  try {
+    await vault.enrollBio()
+    showToast(t('settings.bioEnabled'))
+  } catch {
+    settingsError.value = t('settings.bioEnrollFailed')
+  } finally {
+    settingsBusy.value = false
+  }
+}
+
+async function disableBio() {
+  settingsBusy.value = true
+  try {
+    await vault.removeBio()
+    showToast(t('settings.bioRemoved'))
+  } finally {
+    settingsBusy.value = false
+  }
+}
 
 </script>
 
@@ -787,5 +915,93 @@ const importPopup = computed({
 .import-pop-btn.ghost {
   color: var(--text-2);
   border-color: var(--input-border);
+}
+
+/* 安全设置面板（底部弹出） */
+.set-pop {
+  display: flex;
+  flex-direction: column;
+}
+.set-title {
+  font-size: var(--f-title);
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.set-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 0;
+  border-top: 1px solid var(--card-border);
+}
+.set-section-title {
+  font-size: var(--f-label);
+  font-weight: 700;
+  color: var(--text-2);
+  letter-spacing: 0.02em;
+}
+.set-input {
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: var(--f-body);
+  font-family: var(--font-cn);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.set-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.set-hint {
+  font-size: var(--f-hint);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.set-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.set-ok {
+  font-size: var(--f-body);
+  color: var(--accent);
+  font-weight: 600;
+}
+.set-error {
+  font-size: var(--f-hint);
+  color: var(--danger, #e53e3e);
+  line-height: 1.5;
+}
+.set-btn {
+  height: 44px;
+  border-radius: var(--radius-sm);
+  font-size: var(--f-body);
+  font-weight: 600;
+  font-family: var(--font-cn);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+.set-btn:active {
+  transform: scale(0.98);
+}
+.set-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.set-btn.primary {
+  background: var(--accent);
+  color: #fff;
+}
+.set-btn.danger {
+  background: transparent;
+  color: var(--danger, #e53e3e);
+  border-color: var(--danger, #e53e3e);
 }
 </style>

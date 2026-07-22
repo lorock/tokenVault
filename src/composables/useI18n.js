@@ -31,7 +31,8 @@ const messages = {
       addSite: '添加站点',
       lang: '语言',
       home: '首页',
-      lock: '锁定'
+      lock: '锁定',
+      settings: '设置'
     },
     theme: {
       light: '浅色',
@@ -99,6 +100,26 @@ const messages = {
       errCrypto: '当前环境不支持加密运算，请使用 HTTPS 打开',
       errSetup: '创建失败，请重试',
       errUnlock: '解锁失败，请重试'
+    },
+    settings: {
+      title: '安全设置',
+      bioTitle: '生物识别解锁',
+      bioUnsupported: '当前设备 / 浏览器不支持生物识别',
+      bioEnabled: '已启用指纹 / 面容快速解锁',
+      bioEnable: '启用生物识别',
+      bioDisable: '移除生物识别',
+      bioEnrolling: '请在系统弹窗中验证…',
+      bioEnrollFailed: '生物识别登记失败',
+      bioRemoved: '生物识别已移除',
+      pwTitle: '修改主密码',
+      pwCurrent: '当前密码',
+      pwNew: '新密码',
+      pwConfirm: '确认新密码',
+      pwSave: '保存',
+      pwMismatch: '两次输入的新密码不一致',
+      pwTooShort: '新密码至少 4 位',
+      pwWrong: '当前密码错误',
+      pwChanged: '主密码已更新'
     },
     wechat: {
       downloadHint: '微信内不支持直接下载文件。请长按下方 JSON 文本复制，保存到「文件传输助手」或微信笔记中备份。',
@@ -207,7 +228,8 @@ const messages = {
       addSite: 'Add site',
       lang: 'Language',
       home: 'Home',
-      lock: 'Lock'
+      lock: 'Lock',
+      settings: 'Settings'
     },
     theme: {
       light: 'Light',
@@ -275,6 +297,26 @@ const messages = {
       errCrypto: 'Cryptographic operations are unavailable here. Please use HTTPS.',
       errSetup: 'Setup failed, please retry',
       errUnlock: 'Unlock failed, please retry'
+    },
+    settings: {
+      title: 'Security Settings',
+      bioTitle: 'Biometric Unlock',
+      bioUnsupported: "This device or browser doesn't support biometrics",
+      bioEnabled: 'Biometric (fingerprint / face) unlock is enabled',
+      bioEnable: 'Enable biometrics',
+      bioDisable: 'Remove biometrics',
+      bioEnrolling: 'Please verify in the system prompt…',
+      bioEnrollFailed: 'Biometric enrollment failed',
+      bioRemoved: 'Biometrics removed',
+      pwTitle: 'Change Master Password',
+      pwCurrent: 'Current password',
+      pwNew: 'New password',
+      pwConfirm: 'Confirm new password',
+      pwSave: 'Save',
+      pwMismatch: 'New passwords do not match',
+      pwTooShort: 'New password must be at least 4 characters',
+      pwWrong: 'Current password is incorrect',
+      pwChanged: 'Master password updated'
     },
     wechat: {
       downloadHint: 'Direct file download is not supported in WeChat. Long-press the JSON text below to copy, then save it to "File Transfer" or WeChat Notes as a backup.',
