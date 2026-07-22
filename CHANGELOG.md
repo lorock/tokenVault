@@ -2,6 +2,14 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.7.8] - 2026-07-22
+
+### 调整
+
+- 重置密码校验失败反馈由「位置抖动」改为更克制的「红色边框脉冲」（向外扩散的 ring 光晕，0.5s ease-out，无位移）
+- 新增 `--danger-glow` 主题变量（明/暗）支撑脉冲光晕；`prefers-reduced-motion` 下仅保留静态红框
+- 相关 class / ref 由 `shake` 重命名为 `pulse`（`resetPulse` / `triggerPulse`）
+
 ## [2.7.7] - 2026-07-22
 
 ### 优化

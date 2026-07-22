@@ -221,14 +221,14 @@
               ref="resetPwEl"
               v-model="resetPw"
               class="set-input"
-              :class="{ shake: resetShake }"
+              :class="{ pulse: resetPulse }"
               type="password"
               autocomplete="current-password"
               :placeholder="t('settings.resetPwPh')"
               :aria-label="t('settings.resetPwPh')"
               :aria-invalid="!!resetError"
               @keyup.enter="confirmReset"
-              @animationend="resetShake = false"
+              @animationend="resetPulse = false"
             />
             <div v-if="resetError" class="set-error">{{ resetError }}</div>
             <div class="set-row-between">
@@ -542,12 +542,12 @@ const resetStep = ref('idle')
 const resetPw = ref('')
 const resetError = ref('')
 const resetPwEl = ref(null)
-const resetShake = ref(false)
+const resetPulse = ref(false)
 
-function triggerShake() {
-  resetShake.value = false
+function triggerPulse() {
+  resetPulse.value = false
   nextTick(() => {
-    resetShake.value = true
+    resetPulse.value = true
     if (resetPwEl.value) resetPwEl.value.focus()
   })
 }
@@ -619,7 +619,7 @@ async function confirmReset() {
     const ok = await vault.verifyPassword(resetPw.value)
     if (!ok) {
       resetError.value = t('settings.resetPwWrong')
-      triggerShake()
+      triggerPulse()
       return
     }
     vault.reset()
@@ -636,7 +636,7 @@ async function confirmReset() {
 function startReset() {
   resetError.value = ''
   resetPw.value = ''
-  resetShake.value = false
+  resetPulse.value = false
   resetStep.value = 'confirm'
 }
 
@@ -1057,18 +1057,25 @@ function cancelReset() {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
-.set-input.shake {
+.set-input.pulse {
   border-color: var(--danger, #e53e3e);
-  animation: set-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  animation: set-pulse 0.5s ease-out;
 }
-@keyframes set-shake {
-  10%, 90% { transform: translateX(-1px); }
-  20%, 80% { transform: translateX(2px); }
-  30%, 50%, 70% { transform: translateX(-4px); }
-  40%, 60% { transform: translateX(4px); }
+@keyframes set-pulse {
+  0% {
+    border-color: var(--danger, #e53e3e);
+    box-shadow: 0 0 0 0 var(--danger-glow, rgba(239, 68, 68, 0.3));
+  }
+  70% {
+    box-shadow: 0 0 0 5px transparent;
+  }
+  100% {
+    border-color: var(--danger, #e53e3e);
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .set-input.shake {
+  .set-input.pulse {
     animation: none;
   }
 }
