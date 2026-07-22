@@ -201,6 +201,14 @@
             {{ t('settings.pwSave') }}
           </button>
         </div>
+
+        <div class="set-section set-section-danger">
+          <div class="set-section-title">{{ t('settings.resetTitle') }}</div>
+          <div class="set-hint">{{ t('settings.resetHint') }}</div>
+          <button class="set-btn danger" :disabled="settingsBusy" @click="confirmReset">
+            {{ t('settings.resetBtn') }}
+          </button>
+        </div>
       </div>
     </van-popup>
 
@@ -550,6 +558,29 @@ async function disableBio() {
   try {
     await vault.removeBio()
     showToast(t('settings.bioRemoved'))
+  } finally {
+    settingsBusy.value = false
+  }
+}
+
+async function confirmReset() {
+  try {
+    await showConfirmDialog({
+      title: t('settings.resetConfirmTitle'),
+      message: t('settings.resetConfirmMsg'),
+      confirmButtonText: t('settings.resetConfirm'),
+      cancelButtonText: t('settings.resetCancel'),
+      confirmButtonColor: 'var(--danger, #e54d42)'
+    })
+  } catch {
+    return // 用户取消
+  }
+  settingsBusy.value = true
+  try {
+    vault.reset()
+    settingsPopup.value = false
+    showToast(t('settings.resetDone'))
+    // reset() 已调用 lock()，App.vue 会自动回到锁屏（显示设置主密码）
   } finally {
     settingsBusy.value = false
   }
@@ -934,6 +965,15 @@ async function disableBio() {
   gap: 10px;
   padding: 16px 0;
   border-top: 1px solid var(--card-border);
+}
+.set-section-danger {
+  margin: 0 -16px;
+  padding: 16px;
+  border-top: 1px solid var(--card-border);
+  background: var(--danger-soft, rgba(229, 62, 62, 0.06));
+}
+.set-section-danger .set-section-title {
+  color: var(--danger, #e53e3e);
 }
 .set-section-title {
   font-size: var(--f-label);

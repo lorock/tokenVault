@@ -119,7 +119,15 @@ const messages = {
       pwMismatch: '两次输入的新密码不一致',
       pwTooShort: '新密码至少 4 位',
       pwWrong: '当前密码错误',
-      pwChanged: '主密码已更新'
+      pwChanged: '主密码已更新',
+      resetTitle: '重置 / 清空保险库',
+      resetHint: '将永久删除所有站点与本地加密数据，且无法恢复。操作前建议先「导出备份」。',
+      resetBtn: '重置 / 清空保险库',
+      resetConfirmTitle: '确认清空保险库？',
+      resetConfirmMsg: '所有站点与本地加密数据将被永久删除，且无法恢复。',
+      resetConfirm: '清空',
+      resetCancel: '取消',
+      resetDone: '保险库已清空'
     },
     wechat: {
       downloadHint: '微信内不支持直接下载文件。请长按下方 JSON 文本复制，保存到「文件传输助手」或微信笔记中备份。',
@@ -316,7 +324,15 @@ const messages = {
       pwMismatch: 'New passwords do not match',
       pwTooShort: 'New password must be at least 4 characters',
       pwWrong: 'Current password is incorrect',
-      pwChanged: 'Master password updated'
+      pwChanged: 'Master password updated',
+      resetTitle: 'Reset / Clear Vault',
+      resetHint: 'This permanently deletes all sites and locally encrypted data — unrecoverable. Export a backup first if needed.',
+      resetBtn: 'Reset / Clear Vault',
+      resetConfirmTitle: 'Clear the vault?',
+      resetConfirmMsg: 'All sites and local encrypted data will be permanently deleted and cannot be recovered.',
+      resetConfirm: 'Clear',
+      resetCancel: 'Cancel',
+      resetDone: 'Vault cleared'
     },
     wechat: {
       downloadHint: 'Direct file download is not supported in WeChat. Long-press the JSON text below to copy, then save it to "File Transfer" or WeChat Notes as a backup.',

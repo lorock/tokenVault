@@ -25,6 +25,7 @@
   --input-border: rgba(17, 24, 39, 0.12);
 
   --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.07);
   --warning: #f59e0b;
 
   /* 阴影：分层、柔和、不厚重 */
@@ -72,6 +73,8 @@
   --accent-2: #8db4ff;
   --accent-press: #4a86e8;
   --accent-soft: rgba(91, 155, 255, 0.16);
+  --danger: #ff6b6b;
+  --danger-soft: rgba(255, 107, 107, 0.10);
   --input-bg: rgba(0, 0, 0, 0.28);
   --input-border: rgba(255, 255, 255, 0.14);
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 14px 40px rgba(0, 0, 0, 0.45);
