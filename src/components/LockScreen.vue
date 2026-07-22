@@ -1,15 +1,22 @@
 <template>
   <div class="lock-screen">
     <div class="lock-card">
-      <div class="lock-logo">
-        <van-icon name="shield-o" />
+      <div class="lock-logo" aria-hidden="true">
+        <svg viewBox="0 0 512 512" width="34" height="34" fill="currentColor">
+          <path d="M256 96c44 0 80 36 80 80v40h16c18 0 32 14 32 32v128c0 18-14 32-32 32H160c-18 0-32-14-32-32V248c0-18 14-32 32-32h16v-40c0-44 36-80 80-80zm0 40c-22 0-40 18-40 40v40h80v-40c0-22-18-40-40-40z"/>
+          <circle cx="256" cy="296" r="22"/>
+          <rect x="248" y="300" width="16" height="44" rx="8"/>
+        </svg>
       </div>
 
       <template v-if="!vault.isVaultSet()">
         <h1 class="lock-title">{{ t('lock.setupTitle') }}</h1>
         <p class="lock-sub">{{ t('lock.setupSub') }}</p>
         <div v-if="vault.hasLegacy.value" class="lock-migrate">
-          <van-icon name="exchange" /> {{ t('lock.migrateHint') }}
+          <svg class="lock-migrate-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+            <path d="M6.99 11 3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/>
+          </svg>
+          {{ t('lock.migrateHint') }}
         </div>
         <van-field
           v-model="pw"
@@ -74,7 +81,10 @@
           :loading="vault.busy.value"
           @click="doUnlockBio"
         >
-          <van-icon name="scan" /> {{ t('lock.useBio') }}
+          <svg class="lock-bio-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M5.5 4h-2v4.18C3.84 8.6 4 9.04 4 9.5c0 5.25 4.03 9.55 9.17 9.97v2.02C7.55 21.05 2 16.02 2 9.5c0-.66.08-1.3.23-1.91L.5 5.5v5H3v-6.5zm13.5 0h-2v4.18c.16.42.24.86.24 1.32 0 4.42-3.03 8.13-7.12 9.21l-.64 1.94C13.46 19.92 18 15.58 18 9.5c0-.66-.08-1.3-.23-1.91L20 5.5v5h2.5v-6.5h-3.5zM12 6c-3.31 0-6 2.69-6 6 0 1.66.67 3.16 1.76 4.24l1.41-1.41C8.45 13.9 8 12.52 8 11c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.52-.45 2.9-1.17 3.83l1.41 1.41C17.33 15.16 18 13.66 18 11c0-3.31-2.69-6-6-6zm0 4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+          </svg>
+          {{ t('lock.useBio') }}
         </van-button>
         <button class="lock-forgot" type="button" @click="showReset = true">
           {{ t('lock.forgot') }}
@@ -247,6 +257,10 @@ function doReset() {
   margin-top: 10px;
   color: var(--accent);
   border-color: var(--accent);
+}
+.lock-bio-icon {
+  margin-right: 4px;
+  flex-shrink: 0;
 }
 .lock-forgot {
   display: block;

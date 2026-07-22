@@ -2,6 +2,13 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.7.1] - 2026-07-22
+
+### 修复
+
+- **锁屏图标显示异常**：`LockScreen.vue` 顶部品牌图标原使用 Vant 字体图标 `<van-icon name="shield-o" />`，在部分浏览器因 CSP `font-src 'self'` 拦截 Vant 内联 data URI 字体而显示为空白蓝色块。改为内联 SVG 盾牌图标，不依赖字体；迁移提示与生物识别按钮的图标也同步改为内联 SVG。
+- **CSP 放行 data URI 字体**：`index.html` 与 `public/_headers` 的 CSP 从 `font-src 'self'` 放宽为 `font-src 'self' data:`，确保 Vant 其余字体图标在支持 data URI 的场景正常渲染。
+
 ## [2.7.0] - 2026-07-21
 
 ### 新增（生产就绪 · 安全与健壮性）
