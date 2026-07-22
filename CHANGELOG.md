@@ -2,6 +2,12 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.7.7] - 2026-07-22
+
+### 优化
+- **重置密码校验失败反馈**：`verifyPassword` 失败时输入框抖动（set-shake 关键帧）+ 自动聚焦，并标记 `aria-invalid`；遵循 `prefers-reduced-motion` 时不抖动。
+- 重新进入确认步骤或重新输入时清除抖动与错误态。
+
 ## [2.7.6] - 2026-07-22
 
 ### 优化

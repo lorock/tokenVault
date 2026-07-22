@@ -218,13 +218,17 @@
             <div class="set-divider"></div>
             <div class="set-hint warn">{{ t('settings.resetPwHint') }}</div>
             <input
+              ref="resetPwEl"
               v-model="resetPw"
               class="set-input"
+              :class="{ shake: resetShake }"
               type="password"
               autocomplete="current-password"
               :placeholder="t('settings.resetPwPh')"
               :aria-label="t('settings.resetPwPh')"
+              :aria-invalid="!!resetError"
               @keyup.enter="confirmReset"
+              @animationend="resetShake = false"
             />
             <div v-if="resetError" class="set-error">{{ resetError }}</div>
             <div class="set-row-between">
@@ -245,7 +249,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, computed, defineAsyncComponent } from 'vue'
+import { onMounted, onUnmounted, ref, computed, nextTick, defineAsyncComponent } from 'vue'
 import { showToast, showConfirmDialog } from 'vant'
 import SiteList from '../components/SiteList.vue'
 import CopyFallbackOverlay from '../components/CopyFallbackOverlay.vue'
@@ -537,6 +541,16 @@ const pwNew2 = ref('')
 const resetStep = ref('idle')
 const resetPw = ref('')
 const resetError = ref('')
+const resetPwEl = ref(null)
+const resetShake = ref(false)
+
+function triggerShake() {
+  resetShake.value = false
+  nextTick(() => {
+    resetShake.value = true
+    if (resetPwEl.value) resetPwEl.value.focus()
+  })
+}
 
 function openSettings() {
   settingsError.value = ''
@@ -605,6 +619,7 @@ async function confirmReset() {
     const ok = await vault.verifyPassword(resetPw.value)
     if (!ok) {
       resetError.value = t('settings.resetPwWrong')
+      triggerShake()
       return
     }
     vault.reset()
@@ -621,6 +636,7 @@ async function confirmReset() {
 function startReset() {
   resetError.value = ''
   resetPw.value = ''
+  resetShake.value = false
   resetStep.value = 'confirm'
 }
 
@@ -1040,6 +1056,21 @@ function cancelReset() {
 .set-input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.set-input.shake {
+  border-color: var(--danger, #e53e3e);
+  animation: set-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+@keyframes set-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .set-input.shake {
+    animation: none;
+  }
 }
 .set-hint {
   font-size: var(--f-hint);
