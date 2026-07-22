@@ -9,6 +9,9 @@
 - **生物识别真机联调自检页** `biometric-test.html`：独立诊断页，直接调用应用内核 `vault.js` 的真实函数，在真机（HTTPS/localhost 安全上下文）一键跑通「环境探测 → 主密码解锁取 DEK → `enrollBiometricWithDek` 登记（触发系统指纹/面容）→ `unlockWithBiometric` 解锁 → `decryptSites` 验证」全链路，含 PASS/FAIL 日志区。对真实保险库非破坏式（登记仅追加生物绑定、解锁仅读取）。
 - **加密信封自动化测试** `test/vault-envelope.test.js`：在 Node 22 WebCrypto + `localStorage` polyfill 下验证生物识别解锁依赖的同一套信封逻辑（`setup → unlock → 加解密站点`、`错误密码拒绝`、`改密后旧密码失效`、`未设保险库解锁报错`），共 4 项；全量测试 28/28 通过。
 
+### 改进
+- **自检页打包进 `dist`**：`vite.config.js` 增加多入口 `biotest`，`biometric-test.html` 随 `npm run build` 一并产出到 `dist/`，`vault.js` 被代码分割为共享 chunk，资源路径为相对（`./assets/...`），可直接静态托管于任意域名/子路径。
+
 ### 说明
 - WebAuthn PRF 本身依赖平台认证器（`navigator.credentials`），无法在沙箱中模拟，故真机 PRF 链路交由上述自检页在真实设备联调；离线测试覆盖 PRF 派生出 KEK 之后的通用信封行为。
 - 代码审计确认生物识别登记/解锁链路无逻辑缺陷：`supportsBiometric` 探测、`enrollBiometricWithDek`（PRF salt 与解锁时一致、登记失败不写半截绑定）、`deriveKekFromPrf`（`prf.eval.first` 用同一 salt 保证确定性）、`unlockWithBiometric`（拆封 + verifier 校验）均正确且健壮。
