@@ -2,6 +2,12 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.7.2] - 2026-07-22
+
+### 修复
+
+- **站点卡片长文本溢出**：`SiteCard.vue` 中站点名称（issuer）因 `display:flex` 导致 `text-overflow:ellipsis` 失效，超长时撑开布局。现拆出 `.sc-issuer-name` 单独省略号截断，类型标签（TOTP/HOTP）始终保留不折行；账户名补充 `title` 悬停提示完整文本。
+
 ## [2.7.1] - 2026-07-22
 
 ### 修复

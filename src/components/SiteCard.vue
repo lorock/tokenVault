@@ -6,10 +6,10 @@
       </div>
       <div class="sc-meta">
         <div class="sc-issuer">
-          {{ site.issuer || t('site.unnamed') }}
+          <span class="sc-issuer-name" :title="site.issuer || t('site.unnamed')">{{ site.issuer || t('site.unnamed') }}</span>
           <span class="sc-type">{{ isHotp ? t('site.typeHotp') : t('site.typeTotp') }}</span>
         </div>
-        <div class="sc-account">{{ site.account }}</div>
+        <div class="sc-account" :title="site.account">{{ site.account }}</div>
       </div>
       <van-button size="mini" plain @click="$emit('edit', site)">{{ t('common.edit') }}</van-button>
     </div>
@@ -176,14 +176,19 @@ function onDelete() {
   min-width: 0;
 }
 .sc-issuer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.sc-issuer-name {
+  flex: 1;
+  min-width: 0;
   font-weight: 600;
   font-size: var(--f-subtitle);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 .sc-type {
   flex-shrink: 0;
