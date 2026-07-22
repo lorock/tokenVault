@@ -2,6 +2,17 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.8.0] - 2026-07-22
+
+### 新增
+- **「覆盖全部」二次强提示**：导入弹窗选择「覆盖全部」后，不再直接清空，改为先弹 `showConfirmDialog` 强提示（含「现有 N 个 / 导入 M 个、将永久清空且不可撤销、建议先导出备份」），确认后才用文件完整内容替换保险库；合并导入保持非破坏性不变。新增 `import.replaceConfirmTitle / import.replaceConfirmMsg` 中英文文案，确认按钮标红。
+- **生物识别真机联调自检页** `biometric-test.html`：独立诊断页，直接调用应用内核 `vault.js` 的真实函数，在真机（HTTPS/localhost 安全上下文）一键跑通「环境探测 → 主密码解锁取 DEK → `enrollBiometricWithDek` 登记（触发系统指纹/面容）→ `unlockWithBiometric` 解锁 → `decryptSites` 验证」全链路，含 PASS/FAIL 日志区。对真实保险库非破坏式（登记仅追加生物绑定、解锁仅读取）。
+- **加密信封自动化测试** `test/vault-envelope.test.js`：在 Node 22 WebCrypto + `localStorage` polyfill 下验证生物识别解锁依赖的同一套信封逻辑（`setup → unlock → 加解密站点`、`错误密码拒绝`、`改密后旧密码失效`、`未设保险库解锁报错`），共 4 项；全量测试 28/28 通过。
+
+### 说明
+- WebAuthn PRF 本身依赖平台认证器（`navigator.credentials`），无法在沙箱中模拟，故真机 PRF 链路交由上述自检页在真实设备联调；离线测试覆盖 PRF 派生出 KEK 之后的通用信封行为。
+- 代码审计确认生物识别登记/解锁链路无逻辑缺陷：`supportsBiometric` 探测、`enrollBiometricWithDek`（PRF salt 与解锁时一致、登记失败不写半截绑定）、`deriveKekFromPrf`（`prf.eval.first` 用同一 salt 保证确定性）、`unlockWithBiometric`（拆封 + verifier 校验）均正确且健壮。
+
 ## [2.7.9] - 2026-07-22
 
 ### 修复

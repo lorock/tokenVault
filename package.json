@@ -1,6 +1,6 @@
 {
   "name": "totp-validator",
-  "version": "2.7.9",
+  "version": "2.8.0",
   "private": true,
   "type": "module",
   "description": "TOTP 多站点验证器（Vue 3 + Vite + Vant），面向微信菜单 H5 场景",

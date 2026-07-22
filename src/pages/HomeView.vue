@@ -521,10 +521,25 @@ function mergeImport() {
   if (!importPending.value) return
   applyImport(importPending.value, false)
 }
-function replaceImport() {
+async function replaceImport() {
   if (!importFull.value) return
-  // 覆盖全部：用文件完整内容替换当前保险库（符合「清空现有数据」的文案语义）
-  applyImport(importFull.value, true)
+  // 覆盖全部属于破坏性操作（清空现有数据），在「合并/覆盖」选择之外再做一次强提示，
+  // 避免用户误触导致数据不可逆丢失。确认后才用文件完整内容替换当前保险库。
+  try {
+    await showConfirmDialog({
+      title: t('import.replaceConfirmTitle'),
+      message: t('import.replaceConfirmMsg', {
+        existing: sites.value.length,
+        incoming: importFull.value.length
+      }),
+      confirmButtonText: t('import.replace'),
+      cancelButtonText: t('common.cancel'),
+      confirmButtonColor: '#e53e3e'
+    })
+    applyImport(importFull.value, true)
+  } catch {
+    // 用户取消：保留底部弹窗，等待重新选择合并或取消
+  }
 }
 
 const importCount = computed(() => (importPending.value ? importPending.value.length : 0))

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>令牌盒 · 生物识别联调自检</title>
+  <style>
+    :root {
+      --bg: #0f1320;
+      --card: rgba(255, 255, 255, 0.06);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --text: #f3f5fb;
+      --text-2: #9aa3b8;
+      --accent: #2f6bff;
+      --accent-2: #6f4cff;
+      --ok: #10b981;
+      --danger: #e53e3e;
+      --warn: #f59e0b;
+      --radius: 18px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(111, 76, 255, 0.25), transparent 60%),
+        radial-gradient(900px 500px at -10% 10%, rgba(47, 107, 255, 0.22), transparent 55%),
+        var(--bg);
+      padding: calc(20px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+      line-height: 1.6;
+    }
+    .wrap { max-width: 560px; margin: 0 auto; }
+    .brand {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+    }
+    .brand-logo {
+      width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 10px 30px rgba(47, 107, 255, 0.4);
+      font-size: 24px;
+    }
+    .brand h1 { font-size: 19px; margin: 0; font-weight: 700; }
+    .brand p { margin: 2px 0 0; font-size: 12px; color: var(--text-2); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .card h2 { font-size: 14px; margin: 0 0 12px; color: var(--text-2); letter-spacing: 0.04em; text-transform: uppercase; }
+    .probe { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px dashed var(--card-border); }
+    .probe:last-child { border-bottom: none; }
+    .probe .label { font-size: 14px; }
+    .badge { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+    .badge.ok { color: var(--ok); background: rgba(16, 185, 129, 0.15); }
+    .badge.fail { color: var(--danger); background: rgba(229, 62, 62, 0.15); }
+    .badge.warn { color: var(--warn); background: rgba(245, 158, 11, 0.15); }
+    .badge.idle { color: var(--text-2); background: rgba(154, 163, 184, 0.15); }
+    .btn {
+      width: 100%; height: 48px; border: none; border-radius: 14px;
+      font-size: 15px; font-weight: 700; font-family: var(--font); cursor: pointer;
+      color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 8px 22px rgba(47, 107, 255, 0.35);
+      transition: transform 0.16s ease, opacity 0.16s ease;
+      margin-top: 8px;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+    .btn.danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); box-shadow: none; }
+    .inp {
+      width: 100%; height: 44px; padding: 0 14px; margin-top: 8px;
+      border: 1px solid var(--card-border); border-radius: 12px;
+      background: rgba(0, 0, 0, 0.25); color: var(--text); font-size: 15px; font-family: var(--font);
+      outline: none;
+    }
+    .inp:focus { border-color: var(--accent); }
+    .log {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12.5px; line-height: 1.7; color: var(--text-2);
+      background: rgba(0, 0, 0, 0.32); border: 1px solid var(--card-border);
+      border-radius: 12px; padding: 12px; max-height: 280px; overflow-y: auto;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .log .pass { color: var(--ok); }
+    .log .fail { color: var(--danger); }
+    .log .info { color: var(--text-2); }
+    .log .warn { color: var(--warn); }
+    .hint { font-size: 12px; color: var(--text-2); margin-top: 10px; }
+    .hint code { background: rgba(0,0,0,0.3); padding: 1px 6px; border-radius: 6px; color: var(--text); }
+    details { margin-top: 6px; }
+    summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">
+      <div class="brand-logo">🔐</div>
+      <div>
+        <h1>生物识别联调自检</h1>
+        <p>TokenVault · WebAuthn PRF 真机验证</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>① 环境探测（自动）</h2>
+      <div class="probe"><span class="label">安全上下文 (HTTPS/localhost)</span><span id="p-secure" class="badge idle">…</span></div>
+      <div class="probe"><span class="label">WebAuthn PRF 支持</span><span id="p-prf" class="badge idle">…</span></div>
+      <div class="probe"><span class="label">保险库已设置</span><span id="p-vault" class="badge idle">…</span></div>
+      <div class="probe"><span class="label">生物识别已登记</span><span id="p-enrolled" class="badge idle">…</span></div>
+    </div>
+
+    <div class="card">
+      <h2>② 联调操作</h2>
+      <input id="pw" class="inp" type="password" autocomplete="current-password" placeholder="主密码（登记生物识别时需要）" />
+      <button id="btn-enroll" class="btn">① 登记生物识别（触发系统指纹/面容）</button>
+      <button id="btn-unlock" class="btn">② 生物识别解锁（触发系统验证 → 解密站点）</button>
+      <button id="btn-remove" class="btn danger">③ 移除生物识别</button>
+      <div class="hint">说明：本页直接调用应用内核 <code>vault.js</code> 的真实函数，对<strong>你设备上的真实保险库</strong>操作。登记仅在保险库里追加一条生物绑定（不改动站点）；解锁仅读取。无破坏性。</div>
+    </div>
+
+    <div class="card">
+      <h2>③ 运行日志</h2>
+      <div id="log" class="log"></div>
+      <details>
+        <summary>如何在本机/真机运行（WebAuthn 需要安全上下文）</summary>
+        <div class="hint">
+          <p><strong>本机（桌面 Chrome/Edge 带指纹或 Windows Hello）：</strong></p>
+          <p><code>npm run dev</code> 后浏览器打开 <code>http://localhost:5173/biometric-test.html</code>（localhost 视为安全上下文）。</p>
+          <p><strong>手机（iPhone 面容 / 安卓指纹）：</strong>WebAuthn 必须 HTTPS。把本机 dev server 暴露成 HTTPS：</p>
+          <p><code>npx vite --host</code> + 隧道：<code>cloudflared tunnel --url http://localhost:5173</code>（或 ngrok），用返回的 https 链接在手机打开本页。</p>
+          <p>⚠️ <code>http://192.168.x.x:5173</code> 等非安全上下文会被浏览器拒绝 PRF，无法联调。</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as Vault from './src/lib/vault.js'
+
+    const $ = (id) => document.getElementById(id)
+    const logEl = $('log')
+
+    function log(msg, kind = 'info') {
+      const ts = new Date().toLocaleTimeString()
+      const line = document.createElement('div')
+      line.className = kind
+      line.textContent = `[${ts}] ${msg}`
+      logEl.appendChild(line)
+      logEl.scrollTop = logEl.scrollHeight
+    }
+
+    function setBadge(id, text, cls) {
+      const el = $(id)
+      el.textContent = text
+      el.className = 'badge ' + cls
+    }
+
+    async function probe() {
+      const secure = window.isSecureContext === true
+      setBadge('p-secure', secure ? '安全' : '非安全', secure ? 'ok' : 'fail')
+      if (!secure) log('当前非安全上下文，WebAuthn PRF 将被浏览器拒绝。请用 localhost 或 HTTPS 打开。', 'warn')
+
+      let prf = false
+      try { prf = Vault.supportsBiometric() } catch (e) { log('supportsBiometric 异常: ' + e.message, 'fail') }
+      setBadge('p-prf', prf ? '支持' : '不支持', prf ? 'ok' : 'fail')
+      if (!prf) log('设备/浏览器不支持 WebAuthn PRF（需平台认证器 + PRF 扩展）。无法联调。', 'warn')
+
+      let vaultSet = false
+      try { vaultSet = Vault.isVaultSet() } catch (e) {}
+      setBadge('p-vault', vaultSet ? '已设置' : '未设置', vaultSet ? 'ok' : 'fail')
+      if (!vaultSet) log('保险库未设置。请先在「令牌盒」App 中设置主密码，再回来联调生物识别。', 'warn')
+
+      let enrolled = false
+      try { enrolled = Vault.isBiometricEnrolled() } catch (e) {}
+      setBadge('p-enrolled', enrolled ? '已登记' : '未登记', enrolled ? 'ok' : 'idle')
+
+      $('btn-enroll').disabled = !prf || !vaultSet
+      $('btn-unlock').disabled = !prf || !vaultSet || !enrolled
+      $('btn-remove').disabled = !enrolled
+      log('环境探测完成。', 'info')
+    }
+
+    $('btn-enroll').addEventListener('click', async () => {
+      const pw = $('pw').value
+      if (!pw) { log('请先输入主密码。', 'warn'); $('pw').focus(); return }
+      try {
+        log('正在用主密码解锁以取得内存 DEK…', 'info')
+        const dek = await Vault.unlockWithPassword(pw) // 不写盘，仅取 DEK
+        log('解锁成功，DEK 已在内存。准备创建平台凭证（将弹出系统验证）…', 'info')
+        await Vault.enrollBiometricWithDek(dek) // 触发系统指纹/面容
+        log('✅ 生物识别登记成功：平台凭证已创建，DEK 已用 PRF 派生密钥封装。', 'pass')
+      } catch (e) {
+        log('❌ 登记失败: ' + (e && e.message ? e.message : e), 'fail')
+      } finally {
+        await probe()
+      }
+    })
+
+    $('btn-unlock').addEventListener('click', async () => {
+      try {
+        log('正在发起生物识别解锁（将弹出系统验证）…', 'info')
+        const dek = await Vault.unlockWithBiometric() // 触发系统验证 → PRF 派生 KEK → 拆封 DEK
+        log('✅ 解锁成功，DEK 已还原。正在解密站点…', 'pass')
+        const sites = await Vault.decryptSites(dek)
+        log(`✅ 全链路通过：成功解密 ${sites.length} 个站点。生物识别 PRF 联调 OK。`, 'pass')
+      } catch (e) {
+        log('❌ 生物识别解锁失败: ' + (e && e.message ? e.message : e), 'fail')
+      } finally {
+        await probe()
+      }
+    })
+
+    $('btn-remove').addEventListener('click', async () => {
+      try {
+        await Vault.removeBiometric()
+        log('已移除生物识别绑定。', 'info')
+      } catch (e) {
+        log('移除失败: ' + (e && e.message ? e.message : e), 'fail')
+      } finally {
+        await probe()
+      }
+    })
+
+    probe()
+  </script>
+</body>
+</html>

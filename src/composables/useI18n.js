@@ -62,7 +62,9 @@ const messages = {
       title: '发现 {n} 个新站点',
       desc: '选择导入方式：合并将追加到现有列表，覆盖将清空现有数据。',
       merge: '合并导入（{n} 个）',
-      replace: '覆盖全部'
+      replace: '覆盖全部',
+      replaceConfirmTitle: '覆盖全部站点？',
+      replaceConfirmMsg: '将用导入文件中的 {incoming} 个站点替换当前 {existing} 个站点。现有数据将被永久清空且无法撤销，建议先导出备份。'
     },
     toast: {
       saved: '已保存',
@@ -271,7 +273,9 @@ const messages = {
       title: '{n} new site(s) found',
       desc: 'Choose how to import: merge appends to your current list; replace erases existing data.',
       merge: 'Merge import ({n})',
-      replace: 'Replace all'
+      replace: 'Replace all',
+      replaceConfirmTitle: 'Replace all sites?',
+      replaceConfirmMsg: 'This will replace your current {existing} site(s) with the {incoming} site(s) from the file. Existing data will be permanently erased and cannot be undone — export a backup first.'
     },
     toast: {
       saved: 'Saved',
