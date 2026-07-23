@@ -29,6 +29,9 @@ const hasLegacy = ref(false)
 const pendingLegacy = ref(null)
 const bioAvailable = ref(false)
 const bioEnrolled = ref(false)
+// 是否有「进行中的编辑」（添加/编辑站点表单、导入选择、设置面板打开）。
+// 为 true 时推迟自动锁，避免在用户尚未保存时清掉内存里的在填数据导致丢失。
+const editing = ref(false)
 
 function refreshBioFlags() {
   bioAvailable.value = supportsBiometric()
@@ -110,6 +113,10 @@ export function useVault() {
     error.value = ''
   }
 
+  function setEditing(v) {
+    editing.value = !!v
+  }
+
   async function setSites(next) {
     if (!dek) return false
     sites.value = next
@@ -162,11 +169,13 @@ export function useVault() {
     hasLegacy,
     bioAvailable,
     bioEnrolled,
+    editing,
     init,
     setup,
     unlock,
     unlockBio,
     lock,
+    setEditing,
     setSites,
     changePw,
     enrollBio,

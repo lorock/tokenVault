@@ -43,9 +43,11 @@ function reload() {
   location.reload()
 }
 
-// 自动锁：标签页隐藏即清除内存中的 DEK 与站点，返回时需重新解锁
+// 自动锁：标签页隐藏即清除内存中的 DEK 与站点，返回时需重新解锁。
+// 但若正处于「编辑中」（添加/编辑站点表单、导入选择、设置面板打开），
+// 推迟自动锁，避免清掉用户尚未保存的在填数据导致丢失。
 function onVisibility() {
-  if (document.hidden && vault.unlocked.value) {
+  if (document.hidden && vault.unlocked.value && !vault.editing.value) {
     vault.lock()
   }
 }

@@ -249,7 +249,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, computed, nextTick, defineAsyncComponent } from 'vue'
+import { onMounted, onUnmounted, ref, computed, watch, nextTick, defineAsyncComponent } from 'vue'
 import { showToast, showConfirmDialog } from 'vant'
 import SiteList from '../components/SiteList.vue'
 import CopyFallbackOverlay from '../components/CopyFallbackOverlay.vue'
@@ -362,7 +362,9 @@ async function persist() {
   const ok = await vault.setSites(sites.value)
   if (ok === false) {
     showToast(t('toast.saveFailed'))
+    return false
   }
+  return true
 }
 
 function addSite() {
@@ -375,15 +377,16 @@ function editSite(site) {
   formVisible.value = true
 }
 
-function saveSite(payload) {
+async function saveSite(payload) {
   if (payload.id) {
     const idx = sites.value.findIndex((s) => s.id === payload.id)
     if (idx >= 0) sites.value[idx] = { ...sites.value[idx], ...payload }
   } else {
     sites.value.push({ ...payload, id: uid(), createdAt: Date.now() })
   }
-  persist()
-  showToast(t('toast.saved'))
+  const ok = await persist()
+  // 仅在真正落盘成功时才提示「已保存」，避免保存失败时仍显示成功误导用户
+  if (ok) showToast(t('toast.saved'))
 }
 
 async function deleteSite(id) {
@@ -552,6 +555,14 @@ const importPopup = computed({
 
 // 安全设置面板：修改主密码 + 管理生物识别（需已解锁，DEK 已在内存）
 const settingsPopup = ref(false)
+
+// 任意「进行中编辑」弹窗打开时，告知 vault 推迟自动锁，
+// 避免选图/切后台触发自动锁把尚未保存的在填数据清掉（见 useVault.editing / App.onVisibility）。
+watch(
+  () => formVisible.value || settingsPopup.value || importPopup.value,
+  (open) => vault.setEditing(open),
+  { immediate: true }
+)
 const settingsBusy = ref(false)
 const settingsError = ref('')
 const pwOld = ref('')
