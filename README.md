@@ -168,6 +168,45 @@ npm run build    # 生成 dist/
 
 > 说明：本项目**本地优先、隐私敏感**，未集成远程监控 / 埋点（如 Sentry）。如需可观测性，建议在遵循隐私合规前提下自行接入。
 
+### 🔐 上锁策略（自动锁 vs 手动锁）
+
+两种触发走不同的保护逻辑，共用 `editing` 信号（添加/编辑表单、导入选择、设置面板任一打开时为 `true`）：
+
+- **自动锁**（`App.vue` 监听 `visibilitychange`）：被动事件，编辑中**推迟**不锁，避免静默丢数据。
+- **手动锁**（导航栏 🔒）：主动意图，编辑中先**确认**再锁，尊重用户锁屏诉求又兜底未保存数据。
+- **重置保险库**（`reset()`）：刻意清空全部数据后锁，不在保护范围内。
+
+```mermaid
+flowchart TD
+    S([已解锁: 内存持有 DEK 与站点]) --> T{触发来源}
+
+    T -->|切后台 / 标签页隐藏| Auto["App.vue · onVisibility"]
+    T -->|点击导航栏 🔒| Manual["HomeView · lockApp"]
+
+    %% 自动锁分支
+    Auto --> A1{unlocked 且非 editing?}
+    A1 -->|否 已锁 / 编辑中| ASkip["跳过: 不自动锁<br/>保留在填数据"]
+    A1 -->|是| ALock["vault.lock()<br/>清 DEK + 内存站点"]
+
+    %% 手动锁分支
+    Manual --> M1{editing?}
+    M1 -->|否| MLock["vault.lock()"]
+    M1 -->|是| MConfirm["弹出确认框<br/>(confirm.lockEditing*)"]
+    MConfirm -->|确认锁定| MLock
+    MConfirm -->|取消| MStay["留编辑态<br/>可继续保存"]
+
+    ALock --> LS([锁屏: 主密码 / 生物识别解锁])
+    MLock --> LS
+
+    ASkip -.-> E["editing=true 来源:<br/>添加/编辑表单 · 导入选择 · 设置面板"]
+    MStay -.-> E
+
+    classDef guard fill:#fff3cd,stroke:#d39e00;
+    classDef action fill:#d1ecf1,stroke:#0c5460;
+    class A1,M1 guard;
+    class ALock,MLock action;
+```
+
 ## 🎨 主题
 
 主题状态存于 `localStorage`（`totp_theme`），取值 `light` / `dark` / `system`。`system` 会跟随系统 `prefers-color-scheme` 自动切换。暗色模式由 Vant `ConfigProvider` 暗黑主题驱动，全局组件自动适配。
