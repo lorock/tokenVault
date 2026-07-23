@@ -1,10 +1,22 @@
-name: CI
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
+  workflow_dispatch:
+
+# GITHUB_TOKEN 部署 Pages 所需的最小权限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只跑一个部署，避免并发互相覆盖
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -13,11 +25,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+
+      - name: Setup Pages（自适应 base 路径）
+        # static_site_generator: vite 会自动注入 BASE_PATH 环境变量供后续构建步骤使用：
+        #   项目仓库（如 tokenVault）-> /tokenVault/  （子目录部署）
+        #   用户/组织仓库（<user>.github.io）-> /       （根目录部署）
+        # vite.config.js 通过 process.env.BASE_PATH 读取它，实现根/子目录自适应。
+        id: pages
+        uses: actions/configure-pages@v5
+        with:
+          static_site_generator: vite
 
       - name: Install dependencies
         run: npm ci
@@ -27,3 +49,21 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    # 仅当推送到主分支时才真正部署；PR 只跑上面的构建/测试校验
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

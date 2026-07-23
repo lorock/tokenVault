@@ -10,7 +10,12 @@
   Permissions-Policy: geolocation=(), microphone=(), camera=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains
 
-# Service Worker 必须允许被同域脚本获取，且禁止被跨域嵌入
-/sw.js
+# Service Worker 必须允许被同域脚本获取，且禁止被跨域嵌入。
+# 注意：此 _headers 仅 Netlify / Cloudflare Pages 识别；GitHub Pages 不读取该文件，
+# 也无法下发 Service-Worker-Allowed 等自定义响应头。
+# 但在 GitHub Pages 子路径部署下，SW 位于 /<repo>/sw.js 时默认作用域即 /<repo>/，
+# 正好覆盖该子目录，故无需 Service-Worker-Allowed 也能正常工作。
+# 若改用 Netlify 并部署到根目录，请将下一行的路径改回 /sw.js。
+/tokenVault/sw.js
   Cache-Control: no-cache
   Service-Worker-Allowed: ./

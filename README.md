@@ -41,13 +41,13 @@
 ```
 .
 ├── index.html              # Vite 入口（挂载 #app）+ CSP / 安全响应头 meta
-├── vite.config.js          # 构建配置（base:'./' 适配子路径部署）
+├── vite.config.js          # 构建配置（base 自适应：BASE_PATH / VITE_BASE_URL / 默认 /tokenVault/）
 ├── package.json            # 依赖与脚本（含 test / build）
 ├── package-lock.json       # 锁定依赖版本（建议提交）
 ├── public/
 │   ├── sw.js               # Service Worker：应用外壳缓存优先，离线可用
 │   ├── manifest.webmanifest# PWA 清单（可安装、standalone）
-│   ├── _headers            # 部署层安全响应头（Netlify / Cloudflare Pages 适用）
+│   ├── _headers            # 安全响应头（Netlify / Cloudflare Pages 适用；GitHub Pages 不读取）
 │   └── icon.svg / icon-maskable.svg
 ├── test/                   # node:test 自动化测试（算法 / URI / 加密保险库）
 │   ├── helpers.js
@@ -102,20 +102,31 @@ npm run preview
 
 ## 📦 部署
 
-构建产物为纯静态文件，可部署到任意 HTTPS 静态托管（Nginx、OSS、CloudBase、GitHub Pages、Netlify、Cloudflare Pages 等）：
+构建产物为纯静态文件，可部署到任意 HTTPS 静态托管（Nginx、OSS、CloudBase、GitHub Pages、Netlify、Cloudflare Pages 等）。
+
+### 通用构建
 
 ```bash
 npm install
 npm test         # 运行算法 / 加密保险库自动化测试（node --test）
 npm run build    # 生成 dist/
-# 将 dist/ 整体上传到静态托管根目录即可
+# 将 dist/ 整体上传到静态托管即可（base 决定资源路径前缀）
 ```
 
-- `vite.config.js` 已设 `base: './'`，可部署在子路径下。
+### base 路径（根目录 / 子目录自适应）
+
+`vite.config.js` 的 `base` 取值优先级：`process.env.BASE_PATH` → `process.env.VITE_BASE_URL` → 默认 `/tokenVault/`。
+
+- **GitHub Pages（推荐）**：`.github/workflows/ci.yml` 通过 `actions/configure-pages`（`static_site_generator: vite`）自动注入 `BASE_PATH`——项目仓库（如 `tokenVault`）→ `/tokenVault/`，用户/组织站点仓库（`<user>.github.io`）→ `/`，**无需手动配置即可根目录 / 子目录自适应**。推送 `main` 即自动构建并发布（仓库 Settings → Pages → Source 选 **GitHub Actions**）。
+- **手动构建到其他路径**：`VITE_BASE_URL=/other/ npm run build`（子路径）或 `VITE_BASE_URL=/ npm run build`（根目录）。
+- **本地预览**：`npm run preview`（已对齐默认 `/tokenVault/`）。
+
+> 早期版本用相对 `base: './'`，会在「无尾斜杠」访问（如 `/tokenVault`）时把 `./assets/x.js` 解析到上一级目录导致 404；现改为显式 base，更稳定。
+
 - **必须 HTTPS**：Web Crypto（`crypto.subtle`）仅在安全上下文可用；应用内置安全上下文守卫，非 HTTPS 会展示提示页而非崩溃。
-- **安全响应头**：仓库 `public/_headers` 已为 Netlify / Cloudflare Pages 预设 `Content-Security-Policy`、`X-Frame-Options: DENY`、`frame-ancestors 'none'`、`Strict-Transport-Security`、`Referrer-Policy: no-referrer`、`X-Content-Type-Options: nosniff`、`Permissions-Policy`。Nginx 等请自行在配置中补齐等价头。
+- **安全响应头**：`public/_headers` 为 Netlify / Cloudflare Pages 预设 `Content-Security-Policy`、`X-Frame-Options: DENY`、`frame-ancestors 'none'`、`Strict-Transport-Security`、`Referrer-Policy: no-referrer`、`X-Content-Type-Options: nosniff`、`Permissions-Policy`。**注意 GitHub Pages 不读取 `_headers` 文件、也无法下发 `Service-Worker-Allowed` 等头**；但 SW 在子路径部署下默认作用域即覆盖该子目录，离线缓存仍正常。
 - **PWA / 离线**：`public/sw.js` 缓存应用外壳（导航网络优先、回退缓存；静态资源缓存优先），无网络时仍可查看已存站点；`manifest.webmanifest` 支持「添加到主屏幕」独立运行。
-- **自动化测试与 CI**：`.github/workflows/ci.yml` 在每次推送 / PR 执行 `node --test` + `npm run build`，保证算法正确性与可构建性。
+- **CI / 部署**：`.github/workflows/ci.yml` 在 `push` 到 `main` 时执行 `node --test` + `npm run build` + 部署 GitHub Pages；`pull_request` 仅跑测试 + 构建校验，不部署。
 
 ## 💬 微信公众号菜单场景
 
@@ -152,7 +163,7 @@ npm run build    # 生成 dist/
 | 全局错误边界 | `App.vue` Vue `onErrorCaptured` + `app.config.errorHandler` + 兜底 UI |
 | 可访问性 | `:focus-visible` 键盘焦点轮廓、尊重 `prefers-reduced-motion`、按钮 `aria-label`、移除缩放限制 |
 | 自动化测试 | `node --test` 覆盖 RFC 4226 向量、SHA-1/256/512、URI 往返、加密保险库 |
-| CI | GitHub Actions：推送 / PR 自动跑测试 + 构建 |
+| CI / 部署 | GitHub Actions：推送 main 自动测试 + 构建 + 部署 Pages（base 自适应）；PR 仅校验 |
 | 性能 | Vant 按需引入、表单 / 分享弹窗 `defineAsyncComponent` 懒加载 |
 
 > 说明：本项目**本地优先、隐私敏感**，未集成远程监控 / 埋点（如 Sentry）。如需可观测性，建议在遵循隐私合规前提下自行接入。

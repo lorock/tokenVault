@@ -2,6 +2,21 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.8.1] - 2026-07-24
+
+### 修复 / 改进（子路径部署）
+- **改造支持子目录部署（https://www.abao.men/tokenVault/）**：`vite.config.js` 的 `base` 由相对 `./` 改为显式子路径 `/tokenVault/`。相对 base 在「无尾斜杠」访问（如 `/tokenVault`）时会把资源解析到上一级目录导致 404；显式 base 让资源、Service Worker、PWA scope 始终落在 `/tokenVault/` 下，更稳。
+- **`base` 可经环境变量覆盖**：`VITE_BASE_URL=/other/ npm run build` 可部署到任意其它子路径或根目录（`VITE_BASE_URL=/`），无需改代码。
+- **`public/_headers` 的 Service Worker 规则路径同步改为 `/tokenVault/sw.js`**，使 `Cache-Control: no-cache` 与 `Service-Worker-Allowed` 在当前子路径部署下正确命中。
+- **`preview` 脚本对齐子路径**：`vite preview --host --base /tokenVault/`，本地预览与线上一致。
+- 验证：本地以 `/tokenVault/` 子路径托管 dist，index、assets、`sw.js`、`manifest.webmanifest`、`icon.svg`、`biometric-test.html` 均返回 200，SW 注册为 `/tokenVault/sw.js`。
+
+### GitHub Pages 工作流（根目录/子目录自适应）
+- **`.github/workflows/ci.yml` 重写为「构建 + 部署到 GitHub Pages」**：原仅有 `build + test`，现增加 `upload-pages-artifact` + `deploy-pages` 部署阶段，并声明 `permissions: pages: write / id-token: write` 与 `concurrency` 防并发覆盖。
+- **自适应 base 由 `actions/configure-pages@v5` 注入**：`static_site_generator: vite` 会自动计算并注入 `BASE_PATH`——项目仓库（如 `tokenVault`）→ `/tokenVault/`（子目录部署），用户/组织站点仓库（`<user>.github.io`）→ `/`（根目录部署）。`vite.config.js` 的 `base` 改为 `process.env.BASE_PATH || process.env.VITE_BASE_URL || '/tokenVault/'`，本地验证两种 `BASE_PATH` 均正确（子目录 `/tokenVault/assets/...` + `register("/tokenVault/sw.js")`；根目录 `/assets/...` + `register("/sw.js")`）。
+- **`deploy` 仅在 `push` 到 `main` 时执行**，`pull_request` 只跑构建/测试校验，避免 PR 误部署。
+- 说明：GitHub Pages 不识别 `_headers` 文件、也无法下发 `Service-Worker-Allowed` 头；但 SW 在子路径下默认作用域正好覆盖该子目录，故无需该头（`_headers` 仅对 Netlify/Cloudflare 生效，已加注说明保留）。
+
 ## [2.8.0] - 2026-07-22
 
 ### 新增

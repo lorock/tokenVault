@@ -9,6 +9,8 @@ index.legacy.html
 vendor/
 
 # ===== 内部工作记忆目录（非项目源码）=====
+.vscode/
+.idea/
 .workbuddy/
 
 # ===== 系统 / 编辑器文件 =====
