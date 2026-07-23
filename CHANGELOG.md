@@ -17,6 +17,9 @@
 - **`deploy` 仅在 `push` 到 `main` 时执行**，`pull_request` 只跑构建/测试校验，避免 PR 误部署。
 - 说明：GitHub Pages 不识别 `_headers` 文件、也无法下发 `Service-Worker-Allowed` 头；但 SW 在子路径下默认作用域正好覆盖该子目录，故无需该头（`_headers` 仅对 Netlify/Cloudflare 生效，已加注说明保留）。
 
+### 改进（UI）
+- **顶栏品牌名「令牌盒」移到左侧**：原居中 `#title` 插槽在窄屏会与右侧按钮（语言/主题/导出/导入/设置/锁定）重叠遮挡。现改为 `#left` 插槽，品牌名与右侧操作分属左右独立弹性区，避免遮挡（`.brand-title` 渐变样式不变）。
+
 ## [2.8.0] - 2026-07-22
 
 ### 新增

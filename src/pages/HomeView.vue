@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <van-nav-bar :border="false">
-      <template #title>
+      <template #left>
         <span class="brand-title">{{ t('brand') }}</span>
       </template>
       <template #right>
