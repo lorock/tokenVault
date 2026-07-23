@@ -78,7 +78,9 @@ const messages = {
     },
     confirm: {
       deleteTitle: '删除站点',
-      deleteMsg: '确定删除该站点？'
+      deleteMsg: '确定删除该站点？',
+      lockEditingTitle: '锁定并放弃编辑？',
+      lockEditingMsg: '当前有未保存的内容，锁定后将丢失。确定锁定吗？'
     },
     lock: {
       setupTitle: '设置主密码',
@@ -289,7 +291,9 @@ const messages = {
     },
     confirm: {
       deleteTitle: 'Delete Site',
-      deleteMsg: 'Are you sure you want to delete this site?'
+      deleteMsg: 'Are you sure you want to delete this site?',
+      lockEditingTitle: 'Lock and discard edits?',
+      lockEditingMsg: 'You have unsaved changes. Locking will discard them. Lock anyway?'
     },
     lock: {
       setupTitle: 'Set master password',

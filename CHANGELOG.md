@@ -23,6 +23,7 @@
 ### 修复（扫码/编辑数据丢失）
 - **根因**：扫码添加站点时，二维码仅被「识别」填入表单、尚未落盘；而选图/切后台会让页面 `document.hidden`，触发 `App.vue` 自动锁（`vault.lock()` 清空内存 `sites` 并卸载表单），导致未保存的在填站点随表单一起丢失，解锁后「什么信息都没有了」。
 - **修复**：`useVault` 新增 `editing` 标志；添加/编辑站点表单、导入选择、设置面板任一打开时置 `editing=true`，`App.vue` 自动锁加 `!vault.editing.value` 守卫——编辑中不自动锁，保住在填数据，返回后可继续保存。
+- **手动锁补齐保护**：导航栏🔒按钮（`HomeView.lockApp()`）原直接 `vault.lock()`，编辑中点击会静默丢弃未保存数据。现加 `editing` 守卫：编辑中点击先弹确认（`confirm.lockEditing*` 文案），确认才锁、取消留编辑态，与「自动锁推迟」形成一致的两级保护。新增中英文案键 `confirm.lockEditingTitle` / `confirm.lockEditingMsg`。
 - **附带修正**：`saveSite` 改为仅在 `persist()` 真正落盘成功时才提示「已保存」（原实现无论保存成功与否都弹「已保存」，会在保存失败时误导用户）。
 
 ## [2.8.0] - 2026-07-22

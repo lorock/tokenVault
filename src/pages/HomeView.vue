@@ -423,7 +423,19 @@ function onTheme() {
   showToast(t('theme.toast', { label: t('theme.' + themeApi.label()) }))
 }
 
-function lockApp() {
+// 手动锁：用户主动点🔒。若正处于编辑中（添加/编辑表单、导入、设置打开），
+// 先确认——避免静默丢弃未保存数据（自动锁走的是「推迟」策略，手动锁走「确认」策略）。
+async function lockApp() {
+  if (vault.editing.value) {
+    try {
+      await showConfirmDialog({
+        title: t('confirm.lockEditingTitle'),
+        message: t('confirm.lockEditingMsg')
+      })
+    } catch {
+      return // 用户取消：留在编辑态，不锁
+    }
+  }
   vault.lock()
 }
 
