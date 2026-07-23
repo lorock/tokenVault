@@ -117,7 +117,7 @@ npm run build    # 生成 dist/
 
 `vite.config.js` 的 `base` 取值优先级：`process.env.BASE_PATH` → `process.env.VITE_BASE_URL` → 默认 `/tokenVault/`。
 
-- **GitHub Pages（推荐）**：`.github/workflows/ci.yml` 通过 `actions/configure-pages`（`static_site_generator: vite`）自动注入 `BASE_PATH`——项目仓库（如 `tokenVault`）→ `/tokenVault/`，用户/组织站点仓库（`<user>.github.io`）→ `/`，**无需手动配置即可根目录 / 子目录自适应**。推送 `main` 即自动构建并发布（仓库 Settings → Pages → Source 选 **GitHub Actions**）。
+- **GitHub Pages（推荐）**：`.github/workflows/ci.yml` 用 `actions/configure-pages@v6` 产出 `base_path` 输出（项目仓库如 `tokenVault` → `/tokenVault/`，用户/组织站点仓库 `<user>.github.io` → `/`），并在 Build 步骤显式注入 `BASE_PATH` 环境变量供 Vite 读取——**无需手动配置即可根目录 / 子目录自适应**。不使用 `static_site_generator: vite`，因为该选项会在运行时改写 workflow 文件，在 Node 24 runner 上会触发 `configure-pages@v5` 的已知崩溃。推送 `main` 即自动构建并发布（仓库 Settings → Pages → Source 选 **GitHub Actions**）。
 - **手动构建到其他路径**：`VITE_BASE_URL=/other/ npm run build`（子路径）或 `VITE_BASE_URL=/ npm run build`（根目录）。
 - **本地预览**：`npm run preview`（已对齐默认 `/tokenVault/`）。
 

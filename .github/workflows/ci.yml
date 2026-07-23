@@ -28,18 +28,19 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
-      - name: Setup Pages（自适应 base 路径）
-        # static_site_generator: vite 会自动注入 BASE_PATH 环境变量供后续构建步骤使用：
-        #   项目仓库（如 tokenVault）-> /tokenVault/  （子目录部署）
-        #   用户/组织仓库（<user>.github.io）-> /       （根目录部署）
-        # vite.config.js 通过 process.env.BASE_PATH 读取它，实现根/子目录自适应。
+      - name: Setup Pages（获取 base_path 输出）
+        # 注意：这里【不使用】 static_site_generator: vite。该选项会在运行时反解析并改写本
+        # workflow 文件的 build 步骤来注入 BASE_PATH，在 Node 24 runner 上会触发
+        # configure-pages@v5 的已知崩溃（TypeError: error must be an instance of Error）。
+        # 改为在下方 Build 步骤手动注入 BASE_PATH（见 env），更透明也更稳。
+        # base_path 输出：项目仓库（如 tokenVault）-> /tokenVault/，用户/组织站点 -> /。
         id: pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
         with:
-          static_site_generator: vite
+          enablement: false
 
       - name: Install dependencies
         run: npm ci
@@ -48,6 +49,10 @@ jobs:
         run: npm test
 
       - name: Build
+        # 显式注入 BASE_PATH（由上方 configure-pages 产出）；
+        # vite.config.js 通过 process.env.BASE_PATH 读取，实现根/子目录自适应。
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: npm run build
 
       - name: Upload Pages artifact

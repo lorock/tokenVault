@@ -13,7 +13,7 @@
 
 ### GitHub Pages 工作流（根目录/子目录自适应）
 - **`.github/workflows/ci.yml` 重写为「构建 + 部署到 GitHub Pages」**：原仅有 `build + test`，现增加 `upload-pages-artifact` + `deploy-pages` 部署阶段，并声明 `permissions: pages: write / id-token: write` 与 `concurrency` 防并发覆盖。
-- **自适应 base 由 `actions/configure-pages@v5` 注入**：`static_site_generator: vite` 会自动计算并注入 `BASE_PATH`——项目仓库（如 `tokenVault`）→ `/tokenVault/`（子目录部署），用户/组织站点仓库（`<user>.github.io`）→ `/`（根目录部署）。`vite.config.js` 的 `base` 改为 `process.env.BASE_PATH || process.env.VITE_BASE_URL || '/tokenVault/'`，本地验证两种 `BASE_PATH` 均正确（子目录 `/tokenVault/assets/...` + `register("/tokenVault/sw.js")`；根目录 `/assets/...` + `register("/sw.js")`）。
+- **自适应 base 由 `actions/configure-pages@v6` 产出 `base_path` 输出、并在 Build 步骤手动注入 `BASE_PATH`**：项目仓库（如 `tokenVault`）→ `/tokenVault/`（子目录部署），用户/组织站点仓库（`<user>.github.io`）→ `/`（根目录部署）。**不再使用 `static_site_generator: vite`**——该选项会在运行时改写 workflow 文件来注入 `BASE_PATH`，在 Node 24 runner 上触发 `configure-pages@v5` 的已知崩溃（`TypeError: error must be an instance of Error`）；改为显式注入 `env: BASE_PATH: ${{ steps.pages.outputs.base_path }}` 更透明也更稳。`vite.config.js` 的 `base` 改为 `process.env.BASE_PATH || process.env.VITE_BASE_URL || '/tokenVault/'`，本地验证两种 `BASE_PATH` 均正确（子目录 `/tokenVault/assets/...` + `register("/tokenVault/sw.js")`；根目录 `/assets/...` + `register("/sw.js")`）。
 - **`deploy` 仅在 `push` 到 `main` 时执行**，`pull_request` 只跑构建/测试校验，避免 PR 误部署。
 - 说明：GitHub Pages 不识别 `_headers` 文件、也无法下发 `Service-Worker-Allowed` 头；但 SW 在子路径下默认作用域正好覆盖该子目录，故无需该头（`_headers` 仅对 Netlify/Cloudflare 生效，已加注说明保留）。
 
