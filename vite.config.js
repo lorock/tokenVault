@@ -2,13 +2,12 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
 
-// GitHub Pages 自适应 base（根目录 / 子目录自动适配）：
-// 1) 优先读取 actions/configure-pages 注入的 BASE_PATH：
-//      - 项目仓库    -> /<repo>/  （如 tokenVault 仓库 => /tokenVault/，子目录部署）
-//      - 用户/组织仓库(<user>.github.io) -> /  （根目录部署）
-// 2) 其次可用 VITE_BASE_URL 手动覆盖（例如本地根部署：VITE_BASE_URL=/ npm run build）
-// 3) 默认 /tokenVault/ 与线上 www.abao.men/tokenVault/ 对齐，亦方便本地验证
-const BASE_URL = process.env.BASE_PATH || process.env.VITE_BASE_URL || '/tokenVault/'
+// 部署 base（资源 / Service Worker / PWA scope 的路径前缀）：
+// - 默认 '/'：根目录部署（主部署目标 Cloudflare Pages + 自定义域名，如 tokenvalut.xubaojin.com）
+// - 可用 VITE_BASE_URL 手动覆盖：子路径部署时 VITE_BASE_URL=/tokenVault/ npm run build
+// 不再依赖 actions/configure-pages 注入的 BASE_PATH（该机制仅 GitHub Pages 使用）；
+// Cloudflare Pages 直接从仓库构建，由本默认值 / VITE_BASE_URL 决定 base。
+const BASE_URL = process.env.VITE_BASE_URL || '/'
 
 export default defineConfig({
   plugins: [vue()],

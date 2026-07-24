@@ -2,6 +2,16 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.8.2] - 2026-07-24
+
+### 改进（部署目标切换：GitHub Pages → Cloudflare Pages 根目录）
+- **部署目标改为 Cloudflare Pages + 自定义域名根目录**（`tokenvalut.xubaojin.com`），仓库连接 Cloudflare 后由其直接构建发布（`npm run build` → `dist`）。
+- **`vite.config.js` 的 `base` 默认改为 `/`**（根目录部署），并去掉对 `actions/configure-pages` 注入 `BASE_PATH` 的依赖；保留 `VITE_BASE_URL` 环境变量用于子路径覆盖（`VITE_BASE_URL=/tokenVault/ npm run build`）。
+- **`.github/workflows/ci.yml` 简化为纯 CI**：移除 `configure-pages` / `upload-pages-artifact` / `deploy-pages` 与对应权限，`push`/`pull_request` 仅跑 `node --test` + 构建校验，部署交由 Cloudflare Pages。
+- **`public/_headers` 的 Service Worker 规则路径由 `/tokenVault/sw.js` 改为 `/sw.js`**：Cloudflare Pages 会真正读取并下发 `_headers`（GitHub Pages 不读），根目录部署下 SW 位于 `/sw.js`、默认作用域即 `/`，离线缓存生效。
+- **`preview` 脚本去掉 `--base /tokenVault/`**（`vite preview --host`），本地预览默认 base `/`，与线上一致。
+- 验证：默认构建产物资源引用为 `/assets/...`、SW 注册 `register("/sw.js")`；`VITE_BASE_URL=/tokenVault/` 构建仍正确产出 `/tokenVault/...` + `register("/tokenVault/sw.js")`。
+
 ## [2.8.1] - 2026-07-24
 
 ### 修复 / 改进（子路径部署）

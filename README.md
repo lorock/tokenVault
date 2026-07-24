@@ -41,13 +41,13 @@
 ```
 .
 ├── index.html              # Vite 入口（挂载 #app）+ CSP / 安全响应头 meta
-├── vite.config.js          # 构建配置（base 自适应：BASE_PATH / VITE_BASE_URL / 默认 /tokenVault/）
+├── vite.config.js          # 构建配置（base 自适应：VITE_BASE_URL / 默认 /）
 ├── package.json            # 依赖与脚本（含 test / build）
 ├── package-lock.json       # 锁定依赖版本（建议提交）
 ├── public/
 │   ├── sw.js               # Service Worker：应用外壳缓存优先，离线可用
 │   ├── manifest.webmanifest# PWA 清单（可安装、standalone）
-│   ├── _headers            # 安全响应头（Netlify / Cloudflare Pages 适用；GitHub Pages 不读取）
+│   ├── _headers            # 安全响应头（Cloudflare Pages / Netlify 识别并下发；GitHub Pages 不读取）
 │   └── icon.svg / icon-maskable.svg
 ├── test/                   # node:test 自动化测试（算法 / URI / 加密保险库）
 │   ├── helpers.js
@@ -113,20 +113,20 @@ npm run build    # 生成 dist/
 # 将 dist/ 整体上传到静态托管即可（base 决定资源路径前缀）
 ```
 
-### base 路径（根目录 / 子目录自适应）
+### base 路径（根目录部署为主，支持子路径覆盖）
 
-`vite.config.js` 的 `base` 取值优先级：`process.env.BASE_PATH` → `process.env.VITE_BASE_URL` → 默认 `/tokenVault/`。
+部署目标为 **Cloudflare Pages + 自定义域名根目录**（如 `tokenvalut.xubaojin.com`），`vite.config.js` 的 `base` 默认 `/`，无需任何配置即可根目录部署。
 
-- **GitHub Pages（推荐）**：`.github/workflows/ci.yml` 用 `actions/configure-pages@v6` 产出 `base_path` 输出（项目仓库如 `tokenVault` → `/tokenVault/`，用户/组织站点仓库 `<user>.github.io` → `/`），并在 Build 步骤显式注入 `BASE_PATH` 环境变量供 Vite 读取——**无需手动配置即可根目录 / 子目录自适应**。不使用 `static_site_generator: vite`，因为该选项会在运行时改写 workflow 文件，在 Node 24 runner 上会触发 `configure-pages@v5` 的已知崩溃。推送 `main` 即自动构建并发布（仓库 Settings → Pages → Source 选 **GitHub Actions**）。
-- **手动构建到其他路径**：`VITE_BASE_URL=/other/ npm run build`（子路径）或 `VITE_BASE_URL=/ npm run build`（根目录）。
-- **本地预览**：`npm run preview`（已对齐默认 `/tokenVault/`）。
+- **Cloudflare Pages（当前部署方式）**：仓库连接 Cloudflare 后，由 Cloudflare 直接构建发布（`npm run build` → `dist`），base 取默认值 `/`。`.github/workflows/ci.yml` 仅做 `node --test` + 构建校验，不再负责部署。
+- **子路径部署（如需）**：`VITE_BASE_URL=/tokenVault/ npm run build`，其余无需改动。
+- **本地预览**：`npm run preview`（默认 base `/`）。
 
 > 早期版本用相对 `base: './'`，会在「无尾斜杠」访问（如 `/tokenVault`）时把 `./assets/x.js` 解析到上一级目录导致 404；现改为显式 base，更稳定。
 
 - **必须 HTTPS**：Web Crypto（`crypto.subtle`）仅在安全上下文可用；应用内置安全上下文守卫，非 HTTPS 会展示提示页而非崩溃。
-- **安全响应头**：`public/_headers` 为 Netlify / Cloudflare Pages 预设 `Content-Security-Policy`、`X-Frame-Options: DENY`、`frame-ancestors 'none'`、`Strict-Transport-Security`、`Referrer-Policy: no-referrer`、`X-Content-Type-Options: nosniff`、`Permissions-Policy`。**注意 GitHub Pages 不读取 `_headers` 文件、也无法下发 `Service-Worker-Allowed` 等头**；但 SW 在子路径部署下默认作用域即覆盖该子目录，离线缓存仍正常。
+- **安全响应头**：`public/_headers` 为 Cloudflare Pages / Netlify 预设 `Content-Security-Policy`、`X-Frame-Options: DENY`、`frame-ancestors 'none'`、`Strict-Transport-Security`、`Referrer-Policy: no-referrer`、`X-Content-Type-Options: nosniff`、`Permissions-Policy`。**当前主部署 Cloudflare Pages 会真正读取并下发这些头**（GitHub Pages 不读取，可忽略）；SW 规则已按根目录 `/sw.js` 配置，离线缓存正常。
 - **PWA / 离线**：`public/sw.js` 缓存应用外壳（导航网络优先、回退缓存；静态资源缓存优先），无网络时仍可查看已存站点；`manifest.webmanifest` 支持「添加到主屏幕」独立运行。
-- **CI / 部署**：`.github/workflows/ci.yml` 在 `push` 到 `main` 时执行 `node --test` + `npm run build` + 部署 GitHub Pages；`pull_request` 仅跑测试 + 构建校验，不部署。
+- **CI / 部署**：`.github/workflows/ci.yml` 在 `push`/`pull_request` 到 `main` 时执行 `node --test` + `npm run build` 校验；实际部署由 Cloudflare Pages 从仓库直接构建发布。
 
 ## 💬 微信公众号菜单场景
 
@@ -163,7 +163,7 @@ npm run build    # 生成 dist/
 | 全局错误边界 | `App.vue` Vue `onErrorCaptured` + `app.config.errorHandler` + 兜底 UI |
 | 可访问性 | `:focus-visible` 键盘焦点轮廓、尊重 `prefers-reduced-motion`、按钮 `aria-label`、移除缩放限制 |
 | 自动化测试 | `node --test` 覆盖 RFC 4226 向量、SHA-1/256/512、URI 往返、加密保险库 |
-| CI / 部署 | GitHub Actions：推送 main 自动测试 + 构建 + 部署 Pages（base 自适应）；PR 仅校验 |
+| CI / 部署 | GitHub Actions：推送/PR 自动测试 + 构建校验；Cloudflare Pages 从仓库直接构建发布（base 默认 /） |
 | 性能 | Vant 按需引入、表单 / 分享弹窗 `defineAsyncComponent` 懒加载 |
 
 > 说明：本项目**本地优先、隐私敏感**，未集成远程监控 / 埋点（如 Sentry）。如需可观测性，建议在遵循隐私合规前提下自行接入。
