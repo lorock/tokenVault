@@ -42,7 +42,7 @@ const version = import.meta.env.VITE_APP_VERSION || 'dev'
 // 项目开源仓库地址（页脚 GitHub 图标跳转）
 const REPO_URL = 'https://github.com/lorock/tokenVault'
 
-// 官方站点域名（页脚展示，供用户核对正版域名、谨防仿冒；tokenvault.xubaojin.com 为国际跳转域名）
+// 官方站点域名（页脚展示，供用户核对正版域名、谨防仿冒；唯一官方站点）
 const DOMAIN = 'tokenvault.sre.wang'
 
 function toggleLang() {
