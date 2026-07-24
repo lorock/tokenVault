@@ -43,7 +43,7 @@ const version = import.meta.env.VITE_APP_VERSION || 'dev'
 const REPO_URL = 'https://github.com/lorock/tokenVault'
 
 // 官方站点域名（页脚展示，供用户核对正版域名、谨防仿冒；唯一官方站点）
-const DOMAIN = 'tokenvault.sre.wang'
+const DOMAIN = 'k.sre.wang'
 
 function toggleLang() {
   setLocale(locale.value === 'zh' ? 'en' : 'zh')

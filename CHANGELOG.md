@@ -2,6 +2,14 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.8.5] - 2026-07-25
+
+### 调整（官方域名缩短）
+- **版本号**：`package.json` 由 `2.8.4` 升至 `2.8.5`。
+- 官方站点域名由 `tokenvault.sre.wang` 缩短为 **`k.sre.wang`**（更短易记，已 ICP 备案、国内微信等环境可正常访问）。同步更新 `src/components/AppFooter.vue` 的 `DOMAIN` 常量、`src/lib/legal.js` 隐私政策/免责声明中英文、`README.md` 部署与合规小节、`vite.config.js` 注释。
+- 后端回源域名 `tokenvault.xubaojin.com`（EdgeOne 源站）不变，仍仅作内部回源、不对外展示。
+- 历史 CHANGELOG 中 `tokenvault.sre.wang` 的相关描述保留原样，作为当时部署事实的记录。
+
 ## [2.8.4] - 2026-07-24
 
 ### 调整（域名清理：仅保留单一官方域名）

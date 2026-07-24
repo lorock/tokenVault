@@ -115,7 +115,7 @@ npm run build    # 生成 dist/
 
 ### base 路径（根目录部署为主，支持子路径覆盖）
 
-部署目标为 **Cloudflare Pages + 自定义域名根目录**（唯一官方站点 `tokenvault.sre.wang`，已 ICP 备案、国内微信等环境可正常访问），`vite.config.js` 的 `base` 默认 `/`，无需任何配置即可根目录部署。
+部署目标为 **Cloudflare Pages + 自定义域名根目录**（唯一官方站点 `k.sre.wang`，已 ICP 备案、国内微信等环境可正常访问），`vite.config.js` 的 `base` 默认 `/`，无需任何配置即可根目录部署。
 
 - **Cloudflare Pages（当前部署方式）**：仓库连接 Cloudflare 后，由 Cloudflare 直接构建发布（`npm run build` → `dist`），base 取默认值 `/`。`.github/workflows/ci.yml` 仅做 `node --test` + 构建校验，不再负责部署。
 - **子路径部署（如需）**：`VITE_BASE_URL=/tokenVault/ npm run build`，其余无需改动。
@@ -229,7 +229,7 @@ flowchart TD
 
 入口位于**全局页脚**：每个页面底部均展示「隐私政策」「免责声明」链接与版权声明（`© 2026 令牌盒 · 保留所有权利`）。
 
-本工具官方站点为 **tokenvault.sre.wang**（Cloudflare Pages 根目录部署，已 ICP 备案、国内微信等环境可正常访问）。隐私政策（`/#/privacy`）与免责声明（`/#/disclaimer`）以该站点内页面展示的最新版本为准，条款更新日期见页内「最后更新」。任何其它域名下的同名页面均非官方，请谨防仿冒。
+本工具官方站点为 **k.sre.wang**（Cloudflare Pages 根目录部署，已 ICP 备案、国内微信等环境可正常访问）。隐私政策（`/#/privacy`）与免责声明（`/#/disclaimer`）以该站点内页面展示的最新版本为准，条款更新日期见页内「最后更新」。任何其它域名下的同名页面均非官方，请谨防仿冒。
 
 ## 📝 开发约定
 
