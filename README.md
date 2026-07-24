@@ -207,6 +207,14 @@ flowchart TD
     class ALock,MLock action;
 ```
 
+### 🧭 导航架构（侧边抽屉）
+
+顶部导航仅保留「☰ 汉堡按钮 + 品牌名 令牌盒」，原 6 个操作（添加/导入/导出/设置/主题/语言/锁定 + 法务链接）收纳进**左侧滑出抽屉**（`van-popup position="left"`，宽 78% / 最大 320px、内容可滚动）。相比常驻侧边栏，离屏抽屉在窄屏不挤占内容区、按需出现，从根本上消除屏宽不足导致的按钮截断。
+
+- 抽屉样式置于**非 scoped `<style>`**：`van-popup` 会被 teleport 到 `<body>`，scoped 作用域属性命中不到弹层根节点，导致浅/深色背景失效——这是最易踩的坑。
+- 汉堡图标用**内联 SVG**，不依赖特定 Vant 图标名，规避图标不显示风险。
+- 抽屉头部以 `env(safe-area-inset-top, 0px)` 适配刘海屏。
+
 ## 🎨 主题
 
 主题状态存于 `localStorage`（`totp_theme`），取值 `light` / `dark` / `system`。`system` 会跟随系统 `prefers-color-scheme` 自动切换。暗色模式由 Vant `ConfigProvider` 暗黑主题驱动，全局组件自动适配。
