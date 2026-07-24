@@ -212,14 +212,22 @@ const messages = {
     footer: {
       privacy: '隐私政策',
       disclaimer: '免责声明',
+      github: 'GitHub 开源仓库',
       copyright: '© 2026 令牌盒 · 保留所有权利',
       note: '本工具为开源前端应用，所有数据仅存储于您的本地设备',
-      langLabel: '语言'
+      langLabel: '语言',
+      officialLabel: '官方站点'
+    },
+    update: {
+      title: '发现新版本',
+      message: '已发布新版本，点击更新以加载最新功能与修复（当前页面将重新加载）。',
+      confirm: '立即更新',
+      later: '稍后'
     },
     legal: {
       privacyTitle: '隐私政策',
       disclaimerTitle: '免责声明',
-      updated: '最后更新：2026-07-21'
+      updated: '最后更新：2026-07-24'
     },
     app: {
       errorTitle: '出错了',
@@ -426,14 +434,22 @@ const messages = {
     footer: {
       privacy: 'Privacy Policy',
       disclaimer: 'Disclaimer',
+      github: 'GitHub repository',
       copyright: '© 2026 TokenVault · All Rights Reserved',
       note: 'This tool is an open-source front-end app. All data is stored only on your local device.',
-      langLabel: 'Language'
+      langLabel: 'Language',
+      officialLabel: 'Official site'
+    },
+    update: {
+      title: 'New version available',
+      message: 'A new version is available. Tap update to load the latest features and fixes (the page will reload).',
+      confirm: 'Update now',
+      later: 'Later'
     },
     legal: {
       privacyTitle: 'Privacy Policy',
       disclaimerTitle: 'Disclaimer',
-      updated: 'Last updated: 2026-07-21'
+      updated: 'Last updated: 2026-07-24'
     },
     app: {
       errorTitle: 'Something went wrong',

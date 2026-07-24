@@ -2,6 +2,32 @@
 
 本项目所有重要变更均记录于此。格式参照 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.8.3] - 2026-07-24
+
+### 文档与合规（确认官方域名）
+- 确认生产站点官方域名为 **tokenvalut.xubaojin.com**（Cloudflare Pages 根目录部署），同步更新相关文档与条款。
+- **版本号**：`package.json` 由 `2.8.2` 升至 `2.8.3`。
+- **隐私政策**（`src/lib/legal.js`）：
+  - 明确静态资源由 **Cloudflare Pages** 托管，访问日志记录以 Cloudflare 隐私政策为准（原「您所选择的托管服务商」）。
+  - 新增官方站点声明：`tokenvalut.xubaojin.com` 为本工具唯一官方站点。
+  - 「最后更新」日期更新为 `2026-07-24`（`src/composables/useI18n.js` 的 `legal.updated`，中英双语）。
+- **免责声明**（`src/lib/legal.js`）：新增官方站点声明，提示任何其它域名均非本工具官方页面，谨防仿冒（中英双语）。
+- **README**：部署说明将「如 `tokenvalut.xubaojin.com`」改为「官方站点 `tokenvalut.xubaojin.com`」；合规页面小节补充官方域名声明，明确条款以站点内最新版本为准。
+- **页脚开源入口**（`src/components/AppFooter.vue` + `useI18n`）：页脚新增 GitHub 图标链接，指向开源仓库 `https://github.com/lorock/tokenVault`（新标签页打开，带 `noopener noreferrer` 与中英 `aria-label`）；图标用内联 SVG（沿用项目不依赖字体图标的约定，规避 CSP 拦截）。
+- **页脚官方站点**：页脚新增官方域名展示「官方站点：tokenvalut.xubaojin.com」并链接到该域名，便于用户随时核对正版域名、谨防仿冒（中英 `officialLabel`）。
+
+### 修复（控制台告警 + Vant 图标字体被 CSP 拦截）
+- **Vant 图标字体根治**（`vite.config.js` 新增 `selfHostVantIconFont` 插件 + `public/fonts/`）：Vant 4 的 `@font-face` 内含 `//at.alicdn.com/...` 远程字体回退，被严格 CSP `font-src 'self' data:` 拦截，且离线（SW 外壳）下必然失效。早期用 `main.css` 覆盖 `@font-face` 仅在「后声明胜出」时生效、依赖样式注入顺序、在 dev 下易失效（控制台仍报 alicdn）。现改为**在构建/开发期直接把该 alicdn URL 改写成同源本地路径** `public/fonts/vant-icon.woff`（路径按 `base` 自动拼接，兼容子路径部署），alicdn 字符串从产物彻底消失，dev/prod 行为一致，不再依赖 CSS 级联。字体文件由 `src/assets/fonts/` 移至 `public/fonts/`（由 Vite 原样托管），并移除 `main.css` 中脆弱的覆盖规则。
+- **清理 meta CSP**（`index.html`）：移除 `frame-ancestors 'none'`。该指令无法通过 `<meta>` 下发（浏览器会忽略并告警），真实点击劫持防护由 `public/_headers` 的 `frame-ancestors 'none'` + `X-Frame-Options: DENY` 承担。
+- **修复 dev HMR WebSocket 告警**（`vite.config.js` 的 `server.hmr`）：非 localhost 访问 dev server（局域网 IP / 隧道域名）时 Vite 推断不到端口，控制台报 `ws://localhost:undefined` 且 HMR 失效。现显式配置 `hmr.clientPort`（默认 5173，可用 `HMR_CLIENT_PORT` 环境变量覆盖）与 `protocol: 'ws'`，并 `server.host: true` 允许网络访问。
+
+### 改进（Service Worker 更新机制 · 版本显示）
+- **问题**：`public/sw.js` 缓存名写死 `totp-cache-v1`，且 `sw.js` 字节未变时不重装 SW，导致发版后旧版本离线外壳持续生效——用户卡在旧版、只能手动清浏览器数据才能更新（实测重现）。真实用户不会手动清，故需硬化。
+- **SW 缓存版本化**（`vite.config.js` 新增 `injectSWCacheVersion` 插件 + `public/sw.js`）：构建期将 `sw.js` 中的 `__SW_CACHE_VERSION__` 占位符替换为 `totp-cache-v{version}-{timestamp}`；每次部署都生成全新缓存名，旧缓存（不同名）在 `activate` 阶段被清掉，从根本上杜绝离线外壳陈旧。加时间戳确保同一版本重新构建也会失效。
+- **方案 B：用户主动更新**（`public/sw.js` + `src/main.js`）：SW `install` 不再 `skipWaiting()`，新版本装好后进入 `waiting`；`main.js` 监听 `updatefound` / 既有 `waiting`，用 Vant `showDialog` 弹「发现新版本 / 立即更新」提示，**由用户主动点击**确认后才 `postMessage('SKIP_WAITING')` 接管页面并自动 `location.reload()`。避免静默刷新打断正在看的验证码（验证器类工具的安全优先取舍）。对话框文案见 `useI18n` 的 `update.*`。
+- **修复：页面持续刷新死循环**（`src/main.js`）：原 `controllerchange` 监听只要收到事件就无条件 `location.reload()`，而 `controllerchange` 不止在「用户点更新」时触发——SW 首次安装后 `activate` 阶段的 `clients.claim()`（页面从「无控制」变「被控制」）同样会触发它，导致「首次接管→重载→又被接管→再重载」的无限刷新。原 `reloading` 守卫是单页生效、跨刷新拦不住。现改为用 `updatePending` 把关：**仅当用户确认更新后**才允许 `controllerchange` 触发重载，其余 `controllerchange`（首次 claim 等）一律忽略。
+- **页脚显示版本号**（`src/components/AppFooter.vue` + `vite.config.js` 的 `define` 注入 `import.meta.env.VITE_APP_VERSION`）：页脚新增 `vX.Y.Z` 小字，便于用户/运维自查当前版本，也方便对照「是否已是线上最新」。
+
 ## [2.8.2] - 2026-07-24
 
 ### 改进（部署目标切换：GitHub Pages → Cloudflare Pages 根目录）

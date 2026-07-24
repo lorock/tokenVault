@@ -115,7 +115,7 @@ npm run build    # 生成 dist/
 
 ### base 路径（根目录部署为主，支持子路径覆盖）
 
-部署目标为 **Cloudflare Pages + 自定义域名根目录**（如 `tokenvalut.xubaojin.com`），`vite.config.js` 的 `base` 默认 `/`，无需任何配置即可根目录部署。
+部署目标为 **Cloudflare Pages + 自定义域名根目录**（官方站点 `tokenvalut.xubaojin.com`），`vite.config.js` 的 `base` 默认 `/`，无需任何配置即可根目录部署。
 
 - **Cloudflare Pages（当前部署方式）**：仓库连接 Cloudflare 后，由 Cloudflare 直接构建发布（`npm run build` → `dist`），base 取默认值 `/`。`.github/workflows/ci.yml` 仅做 `node --test` + 构建校验，不再负责部署。
 - **子路径部署（如需）**：`VITE_BASE_URL=/tokenVault/ npm run build`，其余无需改动。
@@ -126,6 +126,7 @@ npm run build    # 生成 dist/
 - **必须 HTTPS**：Web Crypto（`crypto.subtle`）仅在安全上下文可用；应用内置安全上下文守卫，非 HTTPS 会展示提示页而非崩溃。
 - **安全响应头**：`public/_headers` 为 Cloudflare Pages / Netlify 预设 `Content-Security-Policy`、`X-Frame-Options: DENY`、`frame-ancestors 'none'`、`Strict-Transport-Security`、`Referrer-Policy: no-referrer`、`X-Content-Type-Options: nosniff`、`Permissions-Policy`。**当前主部署 Cloudflare Pages 会真正读取并下发这些头**（GitHub Pages 不读取，可忽略）；SW 规则已按根目录 `/sw.js` 配置，离线缓存正常。
 - **PWA / 离线**：`public/sw.js` 缓存应用外壳（导航网络优先、回退缓存；静态资源缓存优先），无网络时仍可查看已存站点；`manifest.webmanifest` 支持「添加到主屏幕」独立运行。
+- **更新机制**：SW 缓存名在构建期注入为 `totp-cache-v{版本}-{时间戳}`（`vite.config.js` 的 `injectSWCacheVersion`），每次部署生成全新缓存名，旧缓存自动失效，从根本上杜绝「发版后离线外壳陈旧、用户卡在旧版」。新版本就绪后**不会静默刷新**，而是弹「发现新版本 / 立即更新」提示，由用户主动确认后才接管并刷新——避免静默刷新打断正在看的验证码（验证器类工具的安全优先取舍）。页脚显示当前版本号 `vX.Y.Z` 便于自查。
 - **CI / 部署**：`.github/workflows/ci.yml` 在 `push`/`pull_request` 到 `main` 时执行 `node --test` + `npm run build` 校验；实际部署由 Cloudflare Pages 从仓库直接构建发布。
 
 ## 💬 微信公众号菜单场景
@@ -227,6 +228,8 @@ flowchart TD
 - **免责声明** `/#/disclaimer`：说明服务「现状」提供、安全责任自负、与第三方无关等。
 
 入口位于**全局页脚**：每个页面底部均展示「隐私政策」「免责声明」链接与版权声明（`© 2026 令牌盒 · 保留所有权利`）。
+
+本工具官方站点为 **tokenvalut.xubaojin.com**（Cloudflare Pages 根目录部署）；隐私政策（`/#/privacy`）与免责声明（`/#/disclaimer`）以该站点内页面展示的最新版本为准，条款更新日期见页内「最后更新」。任何其它域名下的同名页面均非官方，请谨防仿冒。
 
 ## 📝 开发约定
 

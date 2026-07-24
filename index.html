@@ -11,10 +11,10 @@
     <link rel="icon" type="image/svg+xml" href="icon.svg" />
     <link rel="apple-touch-icon" href="icon.svg" />
     <!-- 安全响应头（基线）：完整响应头由托管层 _headers / 服务器配置下发，meta 仅作兜底。
-         frame-ancestors 无法通过 meta 设置，务必在服务器层配置以防范点击劫持。 -->
+         frame-ancestors 无法通过 meta 设置（浏览器会忽略并告警），其真实防护在 public/_headers 中下发。 -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+      content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'"
     />
     <meta name="referrer" content="no-referrer" />
     <meta name="X-Content-Type-Options" content="nosniff" />

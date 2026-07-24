@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import { installVant } from './plugins/vant'
+import { showDialog } from 'vant'
 import './styles/main.css'
 import { useTheme } from './composables/useTheme'
 import { useI18n } from './composables/useI18n'
@@ -29,14 +30,63 @@ if (!window.isSecureContext) {
 
   useTheme().init()
   useI18n().init()
+  const { t } = useI18n()
 
   app.mount('#app')
 
   // 注册 Service Worker：让应用外壳可离线加载（飞行模式 / 无网络仍可取码）
   if ('serviceWorker' in navigator) {
+    // 方案 B：发现新版本时弹窗提示，由用户主动点击「更新」。
+    // 关键修复：只有「用户确认更新」后才在 controllerchange 时重载页面。
+    // controllerchange 不仅在用户点更新时触发 —— SW 首次安装后 activate 阶段的
+    // clients.claim()（把页面从「无控制」变为「被控制」）同样会触发它。若无条件
+    // reload() 会造成「页面持续刷新」的死循环。updatePending 守卫解决此问题。
+    let updatePending = false
+    let reloading = false
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!updatePending || reloading) return
+      reloading = true
+      updatePending = false
+      location.reload()
+    })
+
+    const promptUpdate = (worker) => {
+      showDialog({
+        title: t('update.title'),
+        message: t('update.message'),
+        confirmButtonText: t('update.confirm'),
+        cancelButtonText: t('update.later'),
+        showCancelButton: true
+      })
+        .then(() => {
+          // 用户确认 → 标记待更新，并通知等待中的新 SW 接管；
+          // 随后 controllerchange 触发一次重载加载最新外壳与资源
+          updatePending = true
+          worker.postMessage('SKIP_WAITING')
+        })
+        .catch(() => {})
+    }
+
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register(import.meta.env.BASE_URL + 'sw.js')
+        .then((reg) => {
+          // 已存在等待中的新版本（如用户上次取消了更新）——直接提示
+          if (reg.waiting) {
+            promptUpdate(reg.waiting)
+            return
+          }
+          reg.addEventListener('updatefound', () => {
+            const worker = reg.installing
+            if (!worker) return
+            worker.addEventListener('statechange', () => {
+              // 新版本已安装，且当前有旧 SW 在控制页面 → 提示用户更新
+              if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                promptUpdate(worker)
+              }
+            })
+          })
+        })
         .catch(() => {})
     })
   }

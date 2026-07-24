@@ -1,15 +1,23 @@
 // 令牌盒 Service Worker：应用外壳离线缓存（缓存优先），让验证器在无网络/飞行模式下仍可用。
-const CACHE = 'totp-cache-v1'
+// CACHE 名由构建期注入（见 vite.config.js 的 injectSWCacheVersion），形如
+// totp-cache-v{version}-{timestamp}，每次部署自动作废旧缓存，避免用户卡在旧版本。
+const CACHE = '__SW_CACHE_VERSION__'
 const SHELL = new URL('index.html', self.location.href).href
 
 self.addEventListener('install', (e) => {
+  // 注意：此处不调用 skipWaiting()。新版本装好后进入 waiting 状态，等待主线程
+  // （用户点击「更新」）发来 SKIP_WAITING 消息后再接管，避免静默刷新打断正在看的验证码。
   e.waitUntil(
     caches
       .open(CACHE)
       .then((c) => c.addAll(['./', './index.html', './manifest.webmanifest', './icon.svg']))
-      .then(() => self.skipWaiting())
       .catch(() => {})
   )
+})
+
+// 主线程在用户确认更新后发送 SKIP_WAITING，新 SW 随即激活并接管页面
+self.addEventListener('message', (e) => {
+  if (e.data === 'SKIP_WAITING') self.skipWaiting()
 })
 
 self.addEventListener('activate', (e) => {

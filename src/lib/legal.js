@@ -25,7 +25,7 @@ export const privacy = {
     {
       heading: '四、第三方组件',
       paragraphs: [
-        '本工具使用了 Vue、Vant、qrcode、jsQR 等开源前端库，均仅在前端运行，不涉及数据上报。静态资源由您所选择的托管服务商提供，其可能依据自身政策记录访问日志，请以托管方隐私政策为准。'
+        '本工具使用了 Vue、Vant、qrcode、jsQR 等开源前端库，均仅在前端运行，不涉及数据上报。静态资源由 Cloudflare Pages 托管，其可能依据自身政策记录访问日志，请以 Cloudflare 隐私政策为准。'
       ]
     },
     {
@@ -48,7 +48,7 @@ export const privacy = {
     {
       heading: '七、联系我们',
       paragraphs: [
-        '如对本隐私政策有疑问，可通过项目仓库 Issue 与我们联系。'
+        '本工具官方网站为 tokenvalut.xubaojin.com（唯一官方站点）。如对本隐私政策有疑问，可通过项目仓库 Issue 与我们联系。'
       ]
     },
     {
@@ -80,7 +80,7 @@ export const privacy = {
     {
       heading: '4. Third-Party Components',
       paragraphs: [
-        'This tool uses open-source front-end libraries such as Vue, Vant, qrcode, and jsQR, all of which run only in the browser and do not report data. Static assets are served by your chosen hosting provider, which may log access per its own policy — please refer to that provider’s privacy policy.'
+        'This tool uses open-source front-end libraries such as Vue, Vant, qrcode, and jsQR, all of which run only in the browser and do not report data. Static assets are hosted by Cloudflare Pages, which may log access per its own policy — please refer to Cloudflare’s privacy policy.'
       ]
     },
     {
@@ -103,7 +103,7 @@ export const privacy = {
     {
       heading: '7. Contact Us',
       paragraphs: [
-        'If you have any questions about this privacy policy, please reach out through the project repository Issues.'
+        'The official website of this tool is tokenvalut.xubaojin.com (the only official site). If you have any questions about this privacy policy, please reach out through the project repository Issues.'
       ]
     },
     {
@@ -135,7 +135,7 @@ export const disclaimer = {
     {
       heading: '三、与任何服务商的无关性',
       paragraphs: [
-        '本工具为独立开源项目，<strong>非任何网站、平台或服务商的官方产品</strong>，与 GitHub、Google、AWS 等第三方无任何关联，也不代表其立场。'
+        '本工具为独立开源项目，<strong>非任何网站、平台或服务商的官方产品</strong>，与 GitHub、Google、AWS 等第三方无任何关联，也不代表其立场。本项目唯一官方站点为 tokenvalut.xubaojin.com，任何其它域名的页面均非本工具官方页面，请谨防仿冒。'
       ]
     },
     {
@@ -176,7 +176,7 @@ export const disclaimer = {
     {
       heading: '3. Independence from Any Provider',
       paragraphs: [
-        'This tool is an independent open-source project, <strong>not an official product of any website, platform, or provider</strong>. It has no affiliation with third parties such as GitHub, Google, or AWS, and does not represent their positions.'
+        'This tool is an independent open-source project, <strong>not an official product of any website, platform, or provider</strong>. It has no affiliation with third parties such as GitHub, Google, or AWS, and does not represent their positions. The only official site of this project is tokenvalut.xubaojin.com; any page on another domain is not an official page of this tool — please beware of impersonation.'
       ]
     },
     {
