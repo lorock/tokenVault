@@ -48,7 +48,7 @@ export const privacy = {
     {
       heading: '七、联系我们',
       paragraphs: [
-        '本工具官方网站为 tokenvalut.xubaojin.com（唯一官方站点）。如对本隐私政策有疑问，可通过项目仓库 Issue 与我们联系。'
+        '本工具官方网站为 tokenvault.sre.wang（唯一官方站点，已ICP备案）。其国际跳转域名 tokenvault.xubaojin.com 最终均指向本站点。如对本隐私政策有疑问，可通过项目仓库 Issue 与我们联系。'
       ]
     },
     {
@@ -103,7 +103,7 @@ export const privacy = {
     {
       heading: '7. Contact Us',
       paragraphs: [
-        'The official website of this tool is tokenvalut.xubaojin.com (the only official site). If you have any questions about this privacy policy, please reach out through the project repository Issues.'
+        'The official website of this tool is tokenvault.sre.wang (the only official site, with ICP filing in China). Its international redirect domain, tokenvault.xubaojin.com, ultimately points here. If you have any questions about this privacy policy, please reach out through the project repository Issues.'
       ]
     },
     {
@@ -135,7 +135,7 @@ export const disclaimer = {
     {
       heading: '三、与任何服务商的无关性',
       paragraphs: [
-        '本工具为独立开源项目，<strong>非任何网站、平台或服务商的官方产品</strong>，与 GitHub、Google、AWS 等第三方无任何关联，也不代表其立场。本项目唯一官方站点为 tokenvalut.xubaojin.com，任何其它域名的页面均非本工具官方页面，请谨防仿冒。'
+        '本工具为独立开源项目，<strong>非任何网站、平台或服务商的官方产品</strong>，与 GitHub、Google、AWS 等第三方无任何关联，也不代表其立场。本项目唯一官方站点为 tokenvault.sre.wang（其国际跳转域名 tokenvault.xubaojin.com 最终均指向本站点），任何其它域名的页面均非本工具官方页面，请谨防仿冒。'
       ]
     },
     {
@@ -176,7 +176,7 @@ export const disclaimer = {
     {
       heading: '3. Independence from Any Provider',
       paragraphs: [
-        'This tool is an independent open-source project, <strong>not an official product of any website, platform, or provider</strong>. It has no affiliation with third parties such as GitHub, Google, or AWS, and does not represent their positions. The only official site of this project is tokenvalut.xubaojin.com; any page on another domain is not an official page of this tool — please beware of impersonation.'
+        'This tool is an independent open-source project, <strong>not an official product of any website, platform, or provider</strong>. It has no affiliation with third parties such as GitHub, Google, or AWS, and does not represent their positions. The only official site of this project is tokenvault.sre.wang (its international redirect domain, tokenvault.xubaojin.com, ultimately points here); any page on another domain is not an official page of this tool — please beware of impersonation.'
       ]
     },
     {

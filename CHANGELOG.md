@@ -32,6 +32,12 @@
 - **问题**：新用户首次打开应用时直接显示「设置主密码」表单，用户尚未理解产品价值与安全模型即被要求输入密码，体验生硬且增加流失。
 - **欢迎引导页**（`src/components/LockScreen.vue` + `src/composables/useI18n.js`）：在首次使用流程中加入一页欢迎引导：展示产品定位（安全、本地、开源的 TOTP/HOTP 验证码管理器）与 5 条核心卖点（本地加密、数据不上传、离线生成、生物识别、开源可审计），用户点击「开始使用 / Get Started」后才进入设置主密码表单。表单页顶部增加「返回」链接，允许回到引导页确认信息。通过 `showWelcome` ref 在 `LockScreen` 内部切换，无需改动路由或 App.vue 锁屏逻辑。
 
+### 调整（官方域名：改为已备案域名）
+- **域名变更**：官方站点由未备案的 `tokenvalut.xubaojin.com`（含拼写笔误，且 xubaojin.com 未 ICP 备案，国内微信等环境访问受限）调整为已备案的 **`tokenvault.sre.wang`**（国内可正常访问）。`tokenvault.xubaojin.com` 改为**国际跳转域名**，仅做 HTTP 301 重定向至 `tokenvault.sre.wang`，自身不托管应用（应用只部署在 sre.wang 这一个 origin）。
+- 代码与文档中「官方站点」统一改为 `tokenvault.sre.wang`，并补充「xubaojin.com 为国际跳转域名」说明：`src/components/AppFooter.vue` 的 `DOMAIN` 常量、`src/lib/legal.js` 隐私政策/免责声明中英文、`README.md` 部署与合规小节、`vite.config.js` 注释。
+- **数据迁移提醒**：PWA 保险库数据按 origin（域名）隔离，旧域名（含拼写错误的 `tokenvalut.xubaojin.com`）下已设置的主密码与令牌不会自动带到新域名。切换前请先在旧站点「导出」备份，到新站点「导入」；或直接在新站点重新添加令牌。
+- 历史 CHANGELOG 中此前关于 `tokenvalut.xubaojin.com` 的描述保留原样，以记录当时事实。
+
 ## [2.8.2] - 2026-07-24
 
 ### 改进（部署目标切换：GitHub Pages → Cloudflare Pages 根目录）

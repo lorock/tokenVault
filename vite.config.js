@@ -10,7 +10,7 @@ const require = createRequire(import.meta.url)
 const { version: APP_VERSION } = require('./package.json')
 
 // 部署 base（资源 / Service Worker / PWA scope 的路径前缀）：
-// - 默认 '/'：根目录部署（主部署目标 Cloudflare Pages + 自定义域名，如 tokenvalut.xubaojin.com）
+// - 默认 '/'：根目录部署（主部署目标 Cloudflare Pages + 自定义域名，如 tokenvault.sre.wang；tokenvault.xubaojin.com 作国际跳转）
 // - 可用 VITE_BASE_URL 手动覆盖：子路径部署时 VITE_BASE_URL=/tokenVault/ npm run build
 // 不再依赖 actions/configure-pages 注入的 BASE_PATH（该机制仅 GitHub Pages 使用）；
 // Cloudflare Pages 直接从仓库构建，由本默认值 / VITE_BASE_URL 决定 base。
