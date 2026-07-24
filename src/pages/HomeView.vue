@@ -53,11 +53,6 @@
           <van-icon name="lock" />{{ t('nav.lock') }}
         </button>
       </nav>
-      <div class="drawer-sep"></div>
-      <nav class="drawer-menu" aria-label="legal">
-        <router-link class="drawer-item" to="/privacy" @click="drawer = false">{{ t('footer.privacy') }}</router-link>
-        <router-link class="drawer-item" to="/disclaimer" @click="drawer = false">{{ t('footer.disclaimer') }}</router-link>
-      </nav>
     </van-popup>
 
     <div v-if="storageOk ? !riskDismissed : true" class="risk-banner">
@@ -1291,11 +1286,6 @@ function cancelReset() {
 .drawer-item-danger,
 .drawer-item-danger .van-icon {
   color: var(--danger, #e53e3e);
-}
-.drawer-sep {
-  height: 1px;
-  background: var(--card-border);
-  margin: 6px 14px;
 }
 .drawer-lang-pill {
   display: inline-flex;
