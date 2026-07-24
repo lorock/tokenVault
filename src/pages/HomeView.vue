@@ -2,29 +2,63 @@
   <div class="home">
     <van-nav-bar :border="false">
       <template #left>
+        <button
+          class="nav-btn icon-btn menu-btn"
+          :title="t('nav.menu')"
+          :aria-label="t('nav.menu')"
+          :aria-expanded="drawer"
+          @click="drawer = true"
+        >
+          <svg class="menu-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="4" y1="7" x2="20" y2="7" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="17" x2="20" y2="17" />
+          </svg>
+        </button>
         <span class="brand-title">{{ t('brand') }}</span>
       </template>
-      <template #right>
-        <button class="nav-btn" :title="t('nav.lang')" :aria-label="t('nav.lang')" @click="toggleLang">
-          <span class="lang-pill">{{ locale === 'zh' ? 'EN' : '中' }}</span>
-        </button>
-        <button class="nav-btn icon-btn" :title="t('nav.switchTheme')" :aria-label="t('nav.switchTheme')" @click="onTheme">
-          <van-icon name="bulb-o" />
-        </button>
-        <button class="nav-btn icon-btn" :title="t('nav.export')" :aria-label="t('nav.export')" @click="exportBackup">
-          <van-icon name="upgrade" />
-        </button>
-        <button class="nav-btn icon-btn" :title="t('nav.import')" :aria-label="t('nav.import')" @click="importBackup">
-          <van-icon name="down" />
-        </button>
-        <button class="nav-btn icon-btn" :title="t('nav.settings')" :aria-label="t('nav.settings')" @click="openSettings">
-          <van-icon name="setting-o" />
-        </button>
-        <button class="nav-btn icon-btn" :title="t('nav.lock')" :aria-label="t('nav.lock')" @click="lockApp">
-          <van-icon name="lock" />
-        </button>
-      </template>
     </van-nav-bar>
+
+    <!-- 侧边抽屉：将原本头部 6 个操作按钮收纳进可滚动面板，窄屏不再截断 -->
+    <van-popup
+      v-model:show="drawer"
+      position="left"
+      class="side-drawer"
+      :style="{ width: '78%', maxWidth: '320px' }"
+      :aria-label="t('nav.menu')"
+    >
+      <div class="drawer-head">
+        <span class="brand-title">{{ t('brand') }}</span>
+      </div>
+      <nav class="drawer-menu" aria-label="menu">
+        <button type="button" class="drawer-item" @click="onMenu('add')">
+          <van-icon name="plus" />{{ t('nav.addSite') }}
+        </button>
+        <button type="button" class="drawer-item" @click="onMenu('import')">
+          <van-icon name="down" />{{ t('nav.import') }}
+        </button>
+        <button type="button" class="drawer-item" @click="onMenu('export')">
+          <van-icon name="upgrade" />{{ t('nav.export') }}
+        </button>
+        <button type="button" class="drawer-item" @click="onMenu('settings')">
+          <van-icon name="setting-o" />{{ t('nav.settings') }}
+        </button>
+        <button type="button" class="drawer-item" @click="onMenu('theme')">
+          <van-icon name="bulb-o" />{{ t('nav.switchTheme') }}
+        </button>
+        <button type="button" class="drawer-item" @click="onMenu('lang')">
+          <span class="drawer-lang-pill">{{ locale === 'zh' ? 'EN' : '中' }}</span>{{ t('nav.lang') }}
+        </button>
+        <button type="button" class="drawer-item drawer-item-danger" @click="onMenu('lock')">
+          <van-icon name="lock" />{{ t('nav.lock') }}
+        </button>
+      </nav>
+      <div class="drawer-sep"></div>
+      <nav class="drawer-menu" aria-label="legal">
+        <router-link class="drawer-item" to="/privacy" @click="drawer = false">{{ t('footer.privacy') }}</router-link>
+        <router-link class="drawer-item" to="/disclaimer" @click="drawer = false">{{ t('footer.disclaimer') }}</router-link>
+      </nav>
+    </van-popup>
 
     <div v-if="storageOk ? !riskDismissed : true" class="risk-banner">
       <van-icon name="warning-o" class="risk-icon" />
@@ -327,6 +361,7 @@ const editingSite = ref(null)
 const shareVisible = ref(false)
 const shareSiteData = ref(null)
 const importInput = ref(null)
+const drawer = ref(false)
 
 const storageOk = isStorageAvailable()
 let dismissed = false
@@ -437,6 +472,18 @@ async function lockApp() {
     }
   }
   vault.lock()
+}
+
+// 侧边抽屉菜单：把原本头部的操作收纳进抽屉，点击任一项先收起抽屉再执行对应动作
+function onMenu(action) {
+  drawer.value = false
+  if (action === 'add') addSite()
+  else if (action === 'import') importBackup()
+  else if (action === 'export') exportBackup()
+  else if (action === 'settings') openSettings()
+  else if (action === 'theme') onTheme()
+  else if (action === 'lang') toggleLang()
+  else if (action === 'lock') lockApp()
 }
 
 function exportBackup() {
@@ -1182,5 +1229,85 @@ function cancelReset() {
   background: transparent;
   color: var(--text-2);
   border-color: var(--input-border);
+}
+</style>
+
+<!-- 侧边抽屉样式需在全局作用域生效：van-popup 内容被 teleport 到 body，
+     作用域样式可能无法命中弹层根节点，故用非 scoped 样式保证浅/深色主题下都正确 -->
+<style>
+/* 侧边抽屉（替代头部操作按钮，窄屏不再截断） */
+.menu-btn {
+  margin-right: 4px;
+}
+.menu-ico {
+  display: block;
+}
+.side-drawer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--card-bg);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.drawer-head {
+  display: flex;
+  align-items: center;
+  padding: calc(18px + env(safe-area-inset-top, 0px)) 18px 14px;
+  border-bottom: 1px solid var(--card-border);
+}
+.drawer-menu {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+}
+.drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 13px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: var(--f-body);
+  font-weight: 500;
+  font-family: var(--font-cn);
+  text-align: left;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+.drawer-item .van-icon {
+  font-size: 20px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.drawer-item:hover,
+.drawer-item:active {
+  background: var(--accent-soft);
+}
+.drawer-item-danger,
+.drawer-item-danger .van-icon {
+  color: var(--danger, #e53e3e);
+}
+.drawer-sep {
+  height: 1px;
+  background: var(--card-border);
+  margin: 6px 14px;
+}
+.drawer-lang-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
 }
 </style>

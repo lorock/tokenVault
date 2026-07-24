@@ -32,7 +32,8 @@ const messages = {
       lang: '语言',
       home: '首页',
       lock: '锁定',
-      settings: '设置'
+      settings: '设置',
+      menu: '菜单'
     },
     theme: {
       light: '浅色',
@@ -245,7 +246,8 @@ const messages = {
       lang: 'Language',
       home: 'Home',
       lock: 'Lock',
-      settings: 'Settings'
+      settings: 'Settings',
+      menu: 'Menu'
     },
     theme: {
       light: 'Light',
