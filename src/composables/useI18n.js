@@ -84,6 +84,17 @@ const messages = {
       lockEditingMsg: '当前有未保存的内容，锁定后将丢失。确定锁定吗？'
     },
     lock: {
+      welcomeTitle: '欢迎使用 令牌盒',
+      welcomeSub: '安全、本地、开源的 TOTP/HOTP 验证码管理器',
+      welcomeFeatures: [
+        '本地加密存储（AES-256-GCM + PBKDF2）',
+        '所有数据仅保存在您的设备',
+        '无需网络即可生成验证码',
+        '支持生物识别快速解锁',
+        '开源代码，可审计'
+      ],
+      welcomeStart: '开始使用',
+      welcomeBack: '返回',
       setupTitle: '设置主密码',
       setupSub: '主密码用于加密本机存储的验证码密钥，忘记将无法恢复，请牢记。',
       unlockTitle: '解锁令牌盒',
@@ -306,6 +317,17 @@ const messages = {
       lockEditingMsg: 'You have unsaved changes. Locking will discard them. Lock anyway?'
     },
     lock: {
+      welcomeTitle: 'Welcome to TokenVault',
+      welcomeSub: 'A secure, local, open-source TOTP/HOTP authenticator',
+      welcomeFeatures: [
+        'Encrypted local storage (AES-256-GCM + PBKDF2)',
+        'All data stays on your device',
+        'Generate codes without network',
+        'Biometric unlock support',
+        'Open source & auditable'
+      ],
+      welcomeStart: 'Get Started',
+      welcomeBack: 'Back',
       setupTitle: 'Set master password',
       setupSub: 'The master password encrypts the 2FA secrets stored on this device. If lost, data cannot be recovered — remember it.',
       unlockTitle: 'Unlock TokenVault',

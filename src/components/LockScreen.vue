@@ -10,44 +10,74 @@
       </div>
 
       <template v-if="!vault.isVaultSet()">
-        <h1 class="lock-title">{{ t('lock.setupTitle') }}</h1>
-        <p class="lock-sub">{{ t('lock.setupSub') }}</p>
-        <div v-if="vault.hasLegacy.value" class="lock-migrate">
-          <svg class="lock-migrate-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
-            <path d="M6.99 11 3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/>
-          </svg>
-          {{ t('lock.migrateHint') }}
-        </div>
-        <van-field
-          v-model="pw"
-          type="password"
-          :label="t('lock.password')"
-          :placeholder="t('lock.passwordPh')"
-          autocomplete="new-password"
-          class="lock-field"
-        />
-        <van-field
-          v-model="pw2"
-          type="password"
-          :label="t('lock.confirm')"
-          :placeholder="t('lock.confirmPh')"
-          autocomplete="new-password"
-          class="lock-field"
-        />
-        <label v-if="vault.bioAvailable.value" class="lock-bio">
-          <input type="checkbox" v-model="enableBio" />
-          <span>{{ t('lock.enableBio') }}</span>
-        </label>
-        <van-button
-          block
-          type="primary"
-          round
-          class="lock-btn"
-          :loading="vault.busy.value"
-          @click="doSetup"
-        >
-          {{ t('lock.create') }}
-        </van-button>
+        <template v-if="showWelcome">
+          <h1 class="lock-title">{{ t('lock.welcomeTitle') }}</h1>
+          <p class="lock-sub">{{ t('lock.welcomeSub') }}</p>
+          <ul class="lock-welcome">
+            <li v-for="feature in welcomeFeatures" :key="feature" class="lock-welcome-item">
+              <svg class="lock-welcome-check" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                <path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>{{ feature }}</span>
+            </li>
+          </ul>
+          <van-button
+            block
+            type="primary"
+            round
+            class="lock-btn"
+            @click="showWelcome = false"
+          >
+            {{ t('lock.welcomeStart') }}
+          </van-button>
+        </template>
+
+        <template v-else>
+          <button class="lock-back" type="button" @click="showWelcome = true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/>
+            </svg>
+            {{ t('lock.welcomeBack') }}
+          </button>
+          <h1 class="lock-title">{{ t('lock.setupTitle') }}</h1>
+          <p class="lock-sub">{{ t('lock.setupSub') }}</p>
+          <div v-if="vault.hasLegacy.value" class="lock-migrate">
+            <svg class="lock-migrate-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+              <path d="M6.99 11 3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/>
+            </svg>
+            {{ t('lock.migrateHint') }}
+          </div>
+          <van-field
+            v-model="pw"
+            type="password"
+            :label="t('lock.password')"
+            :placeholder="t('lock.passwordPh')"
+            autocomplete="new-password"
+            class="lock-field"
+          />
+          <van-field
+            v-model="pw2"
+            type="password"
+            :label="t('lock.confirm')"
+            :placeholder="t('lock.confirmPh')"
+            autocomplete="new-password"
+            class="lock-field"
+          />
+          <label v-if="vault.bioAvailable.value" class="lock-bio">
+            <input type="checkbox" v-model="enableBio" />
+            <span>{{ t('lock.enableBio') }}</span>
+          </label>
+          <van-button
+            block
+            type="primary"
+            round
+            class="lock-btn"
+            :loading="vault.busy.value"
+            @click="doSetup"
+          >
+            {{ t('lock.create') }}
+          </van-button>
+        </template>
       </template>
 
       <template v-else>
@@ -118,6 +148,10 @@ const pw = ref('')
 const pw2 = ref('')
 const enableBio = ref(false)
 const showReset = ref(false)
+// 首次使用（未设置主密码）先展示欢迎引导，再进入设置密码
+const showWelcome = ref(true)
+
+const welcomeFeatures = computed(() => t('lock.welcomeFeatures'))
 
 const errText = computed(() => {
   const m = vault.error.value
@@ -226,6 +260,45 @@ function doReset() {
   text-align: center;
   line-height: 1.6;
   margin: 0 0 18px;
+}
+.lock-welcome {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+}
+.lock-welcome-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: var(--f-hint);
+  color: var(--text-2);
+  line-height: 1.5;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--card-border);
+}
+.lock-welcome-item:last-child {
+  border-bottom: none;
+}
+.lock-welcome-check {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--accent);
+}
+.lock-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: -6px auto 8px;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  font-size: var(--f-hint);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.lock-back:hover {
+  color: var(--accent);
 }
 .lock-migrate {
   display: flex;

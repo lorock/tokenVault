@@ -28,6 +28,10 @@
 - **修复：页面持续刷新死循环**（`src/main.js`）：原 `controllerchange` 监听只要收到事件就无条件 `location.reload()`，而 `controllerchange` 不止在「用户点更新」时触发——SW 首次安装后 `activate` 阶段的 `clients.claim()`（页面从「无控制」变「被控制」）同样会触发它，导致「首次接管→重载→又被接管→再重载」的无限刷新。原 `reloading` 守卫是单页生效、跨刷新拦不住。现改为用 `updatePending` 把关：**仅当用户确认更新后**才允许 `controllerchange` 触发重载，其余 `controllerchange`（首次 claim 等）一律忽略。
 - **页脚显示版本号**（`src/components/AppFooter.vue` + `vite.config.js` 的 `define` 注入 `import.meta.env.VITE_APP_VERSION`）：页脚新增 `vX.Y.Z` 小字，便于用户/运维自查当前版本，也方便对照「是否已是线上最新」。
 
+### 改进（首次使用引导）
+- **问题**：新用户首次打开应用时直接显示「设置主密码」表单，用户尚未理解产品价值与安全模型即被要求输入密码，体验生硬且增加流失。
+- **欢迎引导页**（`src/components/LockScreen.vue` + `src/composables/useI18n.js`）：在首次使用流程中加入一页欢迎引导：展示产品定位（安全、本地、开源的 TOTP/HOTP 验证码管理器）与 5 条核心卖点（本地加密、数据不上传、离线生成、生物识别、开源可审计），用户点击「开始使用 / Get Started」后才进入设置主密码表单。表单页顶部增加「返回」链接，允许回到引导页确认信息。通过 `showWelcome` ref 在 `LockScreen` 内部切换，无需改动路由或 App.vue 锁屏逻辑。
+
 ## [2.8.2] - 2026-07-24
 
 ### 改进（部署目标切换：GitHub Pages → Cloudflare Pages 根目录）
